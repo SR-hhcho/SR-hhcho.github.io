@@ -26,6 +26,12 @@ body{
 
 .avatar{width:36px;height:36px;border-radius:8px;object-fit:cover;border:1px solid var(--line)} 
 
+/* 최근기록 폰트/줄간 간격 살짝 축소 */
+.history{font-size:13px}
+.item{font-size:13px; line-height:1.35}
+.meta{font-size:12px}
+.k{font-size:11px; padding:2px 7px}
+
   
 /* 앱바 */
 .appbar{position:sticky;top:0;z-index:60;height:56px;background:#fff;border-bottom:1px solid var(--line);
@@ -505,10 +511,34 @@ function showContacts(){
     // 최근기록 탭이 열려 있으면 다시 그리기
     if (location.hash === '#recent') { renderRecentTab(); }
   }
+
+  function fmtDateSmart(s){
+    // Date 객체 그대로인 경우
+    if (s instanceof Date && !isNaN(s)) return ymdhm(s);
+
+    // 숫자(시리얼) → 날짜
+    if (/^\d+(\.\d+)?$/.test(String(s))) {
+      const d = new Date(Math.round((Number(s) - 25569)*86400*1000)); // Excel serial 보정
+      if (!isNaN(d)) return ymdhm(d);
+    }
+
+    // 일반 문자열 파싱
+    const d2 = new Date(s);
+    if (!isNaN(d2)) return ymdhm(d2);
+
+    // 실패 시 원문 그대로
+    return String(s);
+  }
+  function ymdhm(d){
+    const yoil = ['일','월','화','수','목','금','토'][d.getDay()];
+    const pad = n => String(n).padStart(2,'0');
+    return `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())}(${yoil}) ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
   
 </script>
 </body>
 </html>
+
 
 
 
