@@ -24,6 +24,9 @@ body{
 }
 .wrap{min-height:100%;display:flex;flex-direction:column}
 
+.avatar{width:36px;height:36px;border-radius:8px;object-fit:cover;border:1px solid var(--line)} 
+
+  
 /* 앱바 */
 .appbar{position:sticky;top:0;z-index:60;height:56px;background:#fff;border-bottom:1px solid var(--line);
   display:grid;grid-template-columns:56px 1fr 56px;align-items:center}
@@ -139,6 +142,8 @@ const DELETE_URL   = "https://hook.us2.make.com/j2naw84osfkadkga7xkrljj8ep6rvroh
 const LOGS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTLnxKDu-UGxyHZ86d5HS6G9_aFRvD5TEYFyMmqR-oFogtT1iNvhB08_BciXL2KsepJ_VihsO4qHVnF/pub?gid=0&single=true&output=csv";
 const CONTACTS_CSV_URL = ""; // (선택) 담당자 메일리스트 CSV 퍼블릭 주소 넣으면 더보기 탭에 표시
 
+
+  
 // 차량 등록 (작은 이미지가 있으면 img에 경로)
 const VEHICLES = [
   { id:"V001", name:"806조8193", img:"img/V001.jpg" },
@@ -158,7 +163,33 @@ const fmtDate=(iso)=>{ // 'YYYY/MM/DD(요일) HH:mm'
 };
 function setTab(name){['home','sheet','recent','more'].forEach(k=>el('#tab-'+k)?.classList.toggle('on',k===name));}
 function section(title){return ce('div',{className:'section-title',textContent:title});}
+function refreshAfterChange(vehicle){
+    if (vehicle) { loadHistory(vehicle, true); }   // 차량 화면이면 해당 히스토리 갱신
+    if (location.hash === '#recent') { renderRecentTab(); } // 최근기록 탭 열려 있으면 재그리기
+  }
 
+  async function deleteAndRefresh(ts, vehicle, btn){
+    if (!DELETE_URL){ toast('삭제URL 미설정', false); return; }
+    if (!confirm('이 기록을 삭제할까요?')) return;
+
+    try{
+      if (btn) btn.disabled = true;
+      const r = await fetch(DELETE_URL,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ ts, vehicle })
+      });
+      if(!r.ok) throw new Error('삭제 실패');
+      toast('삭제 완료');
+      // 0.7초 쉬고 최신 데이터 반영
+      setTimeout(function(){ refreshAfterChange(vehicle); }, 700);
+    }catch(e){
+      toast('삭제 오류: '+e.message, false);
+    }finally{
+      if (btn) btn.disabled = false;
+    }
+  }
+  
 /* ===== 라우터 (해시 기반: #/, #/V001, #/sheet ...) ===== */
 function route(){
   const seg = (location.hash||'#/').slice(2).split('/').filter(Boolean);
@@ -182,18 +213,16 @@ function renderHome(){
   VEHICLES.forEach(function(v){
     var a = ce('a',{className:'tile', href: '/' + encodeURIComponent(v.id)});
 
-    // 썸네일 이미지 + 확장자 폴백
     var img = ce('img',{className:'avatar', src: v.img || ''});
     img.onerror = function(){
-      // jpg ↔ png 자동 폴백
-      if (this.src.toLowerCase().endsWith('.png')) this.src = this.src.replace(/\.png$/i,'.jpg');
-      else if (this.src.toLowerCase().endsWith('.jpg')) this.src = this.src.replace(/\.jpg$/i,'.png');
-      else this.remove(); // 둘 다 실패하면 이미지 제거
+      const s = this.src;
+      if (/\.png$/i.test(s)) this.src = s.replace(/\.png$/i,'.jpg');
+      else if (/\.jpg$/i.test(s)) this.src = s.replace(/\.jpg$/i,'.png');
+      else this.remove();
     };
 
     var left = ce('div',{style:'display:flex;align-items:center;gap:10px'});
     left.append(img, ce('span',{className:'plate',textContent:(v.name||'')}));
-
     var right = ce('span',{className:'idtag',textContent:v.id});
     a.append(left, right);
     grid.append(a);
@@ -201,6 +230,7 @@ function renderHome(){
 
   page.append(p1, grid);
 }
+
 
 
 /* ===== 차량 페이지 ===== */
@@ -405,35 +435,30 @@ function renderMoreTab(){
 }
 
 /* ===== 차량별 히스토리(상세) + 삭제 버튼 ===== */
-function loadHistory(vehicle,force){
-  const body=el('#histBody'); if(!body) return;
-  fetchCsv(rows=>{
-    const out=rows.filter((r,i)=>i>0 && String(r[1]||'').toUpperCase()===vehicle)
-      .slice(-30).reverse().map(r=>{
-        const ts=r[0]||'', name=r[4]||'', dept=r[8]||'', odo=r[5]||'', day=r[6]||'', memo=r[7]||'';
-        const vname=(VEHICLES.find(v=>v.id===vehicle)?.name)||vehicle;
-        return `<div class="hitem">
-          <div class="kpill">${day?`${day}km`:'—'}</div>
-          <div class="hline">
-            <div class="hmeta">${vname} · ${fmtDate(ts)}</div>
-            <div><strong style="font-weight:900">${name}</strong> · ${dept} · 주행후 ${odo}km${memo?` · ${memo}`:''}
-              ${DELETE_URL?' <button data-ts="'+encodeURIComponent(ts)+'" data-v="'+vehicle+'" class="btn" style="padding:4px 8px;font-size:11px;border-radius:8px;margin-left:6px">삭제</button>':''}
+function loadHistory(vehicle, force){
+  var body = el('#histBody'); if(!body) return;
+  fetchCsv(function(rows){
+    const out = rows
+      .filter((r,i)=> i>0 && String(r[1]||'').trim().toUpperCase()===vehicle)
+      .slice(-30).reverse()
+      .map(r=>{
+        const date = fmtDateSmart(r[0]||'');
+        const name = r[4]||'', dept=r[8]||'', odo=r[5]||'', day=r[6]||'', memo=r[7]||'';
+        // A열(기록시각)은 시트에 보이는 문자열 그대로 delete에 사용해야 매칭됩니다.
+        const tsRaw = r[0] || '';
+        return `
+          <div class="item">
+            <span class="k">${day? (day+'km') : '—'}</span>
+            <div style="flex:1;">
+              <div><strong>${name}</strong> · ${dept} · <span class="meta">${date}</span></div>
+              <div class="meta">주행후 ${odo}km${memo? ' · '+memo:''}</div>
             </div>
-          </div>
-        </div>`;
-      }).join('') || '<div class="hmeta">기록이 없습니다.</div>';
-    body.innerHTML=out;
-    if(DELETE_URL){
-      body.querySelectorAll('button[data-ts]').forEach(b=>{
-        b.onclick=()=>{ if(!confirm('정말 삭제할까요?')) return;
-          const ts=decodeURIComponent(b.getAttribute('data-ts')), veh=b.getAttribute('data-v');
-          fetch(DELETE_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ts,vehicle:veh})})
-            .then(r=>{if(!r.ok) throw new Error('삭제 실패'); toast('삭제 완료'); loadHistory(vehicle,true); })
-            .catch(e=>toast('삭제 오류: '+e.message,false));
-        };
-      });
-    }
-  },force);
+            <button class="btn" style="padding:6px 10px;font-size:12px"
+              onclick="deleteAndRefresh(${JSON.stringify(tsRaw)}, ${JSON.stringify(vehicle)}, this)">삭제</button>
+          </div>`;
+      }).join('') || '<div class="item meta">기록이 없습니다.</div>';
+    body.innerHTML = out;
+  }, force);
 }
 
 /* ===== CSV 공통 ===== */
@@ -484,6 +509,7 @@ function showContacts(){
 </script>
 </body>
 </html>
+
 
 
 
