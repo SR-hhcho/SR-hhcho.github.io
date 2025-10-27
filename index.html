@@ -106,6 +106,10 @@ button.primary:active{background:var(--blue-press)}
 .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#fff;border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.08);padding:10px 12px;border-radius:12px;font-size:14px;display:none}
 .toast.ok{border-color:#b2f2bb;color:#0c7;display:block}
 .toast.err{border-color:#ffc9c9;color:var(--err);display:block}
+
+.avatar{width:36px;height:36px;border-radius:8px;object-fit:cover;border:1px solid var(--line)}
+
+  
 </style>
 </head>
 <body>
@@ -171,20 +175,33 @@ route();
 
 /* ===== 홈 ===== */
 function renderHome(){
-  const page=el('#page'); page.innerHTML='';
-  page.append(section('차량 선택'), ce('p',{className:'caption',textContent:'차량을 선택해 기록하거나 QR로 바로 접속하세요.'}));
-  const grid=ce('div',{className:'list'});
-  VEHICLES.forEach(v=>{
-    const a=ce('a',{className:'tile', href:`#/${encodeURIComponent(v.id)}`});
-    if(v.img){ a.append(ce('img',{src:v.img,alt:v.id})); }
-    const box=ce('div',{className:'tile-main'});
-    box.append(ce('div',{className:'plate',textContent:v.name||''}));
-    box.append(ce('div',{className:'idtag',textContent:v.id}));
-    a.append(box);
+  var page = el('#page'); page.innerHTML = '';
+  var p1 = ce('p',{className:'caption',textContent:'차량을 선택해 기록하세요.'});
+
+  var grid = ce('div',{className:'list'});
+  VEHICLES.forEach(function(v){
+    var a = ce('a',{className:'tile', href: '/' + encodeURIComponent(v.id)});
+
+    // 썸네일 이미지 + 확장자 폴백
+    var img = ce('img',{className:'avatar', src: v.img || ''});
+    img.onerror = function(){
+      // jpg ↔ png 자동 폴백
+      if (this.src.toLowerCase().endsWith('.png')) this.src = this.src.replace(/\.png$/i,'.jpg');
+      else if (this.src.toLowerCase().endsWith('.jpg')) this.src = this.src.replace(/\.jpg$/i,'.png');
+      else this.remove(); // 둘 다 실패하면 이미지 제거
+    };
+
+    var left = ce('div',{style:'display:flex;align-items:center;gap:10px'});
+    left.append(img, ce('span',{className:'plate',textContent:(v.name||'')}));
+
+    var right = ce('span',{className:'idtag',textContent:v.id});
+    a.append(left, right);
     grid.append(a);
   });
-  page.append(grid);
+
+  page.append(p1, grid);
 }
+
 
 /* ===== 차량 페이지 ===== */
 function renderVehicle(vehicle){
@@ -454,6 +471,16 @@ function showContacts(){
     alert('메일 담당자\n\n- '+rows.join('\n- '));
   }).catch(()=>toast('불러오기 실패',false));
 }
+
+  // ... 기존 코드 위아래 상관없음 (전역 범위에) 추가
+  function refreshAfterChange(vehicle){
+    // 차량 상세 화면이면 그 차량 히스토리만 새로고침
+    if (vehicle) { loadHistory(vehicle, true); }
+
+    // 최근기록 탭이 열려 있으면 다시 그리기
+    if (location.hash === '#recent') { renderRecentTab(); }
+  }
+  
 </script>
 </body>
 </html>
