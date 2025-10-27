@@ -221,15 +221,15 @@ function renderVehicle(vehicle){
 
   // 성명/부서 (자동완성 제한)
   const row=ce('div',{className:'row'});
-  const nameI=ce('input',{id:'userName',placeholder:'성명'});
-  const deptI=ce('input',{id:'dept',placeholder:'부서'});
+  const nameI=ce('input',{id:'userName',placeholder:'예) 윤종선'});
+  const deptI=ce('input',{id:'dept',placeholder:'예) 안전관리팀'});
   row.append(field('성명',nameI), field('부서',deptI));
   card.append(row);
 
   // 운행 후/비고 (같은 줄)
   const row2=ce('div',{className:'row'});
-  const odoI=ce('input',{id:'odo',type:'number',inputMode:'numeric',placeholder:'숫자만 입력: 예) 21840'});
-  const memoI=ce('textarea',{id:'memo',placeholder:'운행목적 등'}); // 1줄 고정
+  const odoI=ce('input',{id:'odo',type:'number',inputMode:'numeric',placeholder:'예) 21840'});
+  const memoI=ce('textarea',{id:'memo',placeholder:'시설점검 등'}); // 1줄 고정
   row2.append(field('운행 후 km(숫자)',odoI), field('비고(선택)',memoI));
   card.append(row2);
 
@@ -484,6 +484,7 @@ function showContacts(){
 </script>
 </body>
 </html>
+
 
 
 
