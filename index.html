@@ -411,18 +411,22 @@ submit.onclick = async () => {
     // 시트 반영 대기 (최대 15초)
     const ok = await waitUntilUpdated(vehicle, beforeCount, 15000);
 
-    if (ok) {
-      toast('전송 완료! ✅', true);
-      odoI.value = '';
-      memoI.value = '';
-      odoI.focus();
+if (ok) {
+  toast('전송 완료! ✅', true);
+  odoI.value = '';
+  memoI.value = '';
+  odoI.focus();
 
-      // 운행 전 km/히스토리 즉시 갱신
-      refreshPrev(true);
-      loadHistory(vehicle, true);
-    } else {
-      toast('전송은 완료되었으나 반영이 지연 중입니다. 잠시 후 다시 확인해주세요.', false);
-    }
+  // 운행 전 km/히스토리 즉시 갱신
+  refreshPrev(true);
+  loadHistory(vehicle, true);
+
+  // ✅ 추가: 1.5초 후 자동 새로고침 (주행전 km, 최근기록, 시트 등 전체 반영)
+  setTimeout(() => refreshAfterChange(vehicle), 1500);
+} else {
+  toast('전송은 완료되었으나 반영이 지연 중입니다. 잠시 후 다시 확인해주세요.', false);
+}
+
   } catch (e) {
     toast('전송 실패: ' + e.message, false);
   } finally {
@@ -645,6 +649,7 @@ function showContacts(){
 </script>
 </body>
 </html>
+
 
 
 
