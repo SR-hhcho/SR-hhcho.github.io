@@ -369,7 +369,7 @@ function renderVehicle(vehicle){
   // 초기화
   resetBtn.onclick=()=>{localStorage.removeItem(keyN);localStorage.removeItem(keyD);nameI.value='';deptI.value='';toast('저장된 이름/부서를 삭제했습니다.');};
 
-  // 제출  (이 블록 전체로 교체)
+// 제출  (교체본)
 submit.onclick = async () => {
   const NAME_ALLOW = ["김학철","최종우","권철운","이승훈","권태국","윤종선","한동훈","박남주","남광현","김대현","원동섭","조항현"];
   const DEPT_ALLOW = ["안전관리팀","안전기술팀","영업공무팀"];
@@ -379,14 +379,16 @@ submit.onclick = async () => {
   const odo      = odoI.value.trim();
   const memo     = memoI.value.trim();
 
+  // 입력 검증
   if (!NAME_ALLOW.includes(userName)) { toast('성명은 목록에서 선택해주세요.', false); nameI.focus(); return; }
   if (!DEPT_ALLOW.includes(dept))     { toast('부서는 목록에서 선택해주세요.', false);  deptI.focus();   return; }
   if (!odo || isNaN(+odo))            { toast('운행 후 km(숫자)를 입력해주세요', false);     odoI.focus();    return; }
 
+  // 로컬 저장
   localStorage.setItem('drive_userName', userName);
   localStorage.setItem('drive_dept',     dept);
 
-  // 전송 전, 해당 차량의 기존 건수 스냅샷
+  // 전송 전: 해당 차량 기존 로그 건수 스냅샷
   const beforeCount = await new Promise(res => {
     fetchCsv(rows => {
       const c = rows.filter((r,i)=> i>0 && String(r[1]||'').toUpperCase()===vehicle).length;
@@ -398,6 +400,7 @@ submit.onclick = async () => {
   setLoading(true, '기록 전송 중…');
 
   try {
+    // Make 웹훅으로 전송
     const r = await fetch(WEBHOOK_URL, {
       method: 'POST',
       headers: { 'Content-Type':'application/json' },
@@ -405,14 +408,18 @@ submit.onclick = async () => {
     });
     if (!r.ok) throw new Error('네트워크 오류');
 
-    // 시트 반영 완료될 때까지 최대 15초 대기
+    // 시트 반영 대기 (최대 15초)
     const ok = await waitUntilUpdated(vehicle, beforeCount, 15000);
 
     if (ok) {
       toast('전송 완료! ✅', true);
-      odoI.value = ''; memoI.value = ''; odoI.focus();
-      refreshPrev(true);           // 운행 전 km 즉시 갱신
-      loadHistory(vehicle, true);  // 차량 히스토리 새로고침
+      odoI.value = '';
+      memoI.value = '';
+      odoI.focus();
+
+      // 운행 전 km/히스토리 즉시 갱신
+      refreshPrev(true);
+      loadHistory(vehicle, true);
     } else {
       toast('전송은 완료되었으나 반영이 지연 중입니다. 잠시 후 다시 확인해주세요.', false);
     }
@@ -638,6 +645,7 @@ function showContacts(){
 </script>
 </body>
 </html>
+
 
 
 
