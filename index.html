@@ -261,6 +261,11 @@ const VEHICLES = [
   { id:"V003", name:"804너3147", img:"img/V003.jpg" }
 ];
 
+// 허용 목록 (여기에만 추가/수정하면 드롭다운에 반영됩니다)
+const NAME_ALLOW = ["김학철","최종우","권철운","이승훈","권태국","윤종선","한동훈","박남주","남광현","김대현","원동섭","조항현"];
+const DEPT_ALLOW = ["안전관리팀","안전기술팀","영업공무팀"];
+
+
 /* ===== 유틸 ===== */
 const el=(s,p=document)=>p.querySelector(s);
 const ce=(t,o={})=>Object.assign(document.createElement(t),o);
@@ -400,7 +405,10 @@ const deptSel = ce('select',{id:'dept', className:'select'});
 deptSel.append(ce('option',{value:'', textContent:'부서 선택'}));
 DEPT_ALLOW.forEach(d=> deptSel.append(ce('option',{value:d, textContent:d})));
 
-row.append(fieldLabelled('성명', nameSel, /*required=*/true), fieldLabelled('부서', deptSel, /*required=*/true));
+row.append(
+  fieldLabelled('성명', nameSel, /*required=*/true),
+  fieldLabelled('부서', deptSel, /*required=*/true)
+);
 card.append(row);
 
   // 운행 후/비고 (같은 줄)
@@ -437,22 +445,18 @@ const savedN = localStorage.getItem(keyN), savedD = localStorage.getItem(keyD);
 if (savedN && NAME_ALLOW.includes(savedN)) nameSel.value = savedN;
 if (savedD && DEPT_ALLOW.includes(savedD)) deptSel.value = savedD;
 
-  // 자동완성 제한(허용 목록)
-  const NAME_ALLOW = ["김학철","최종우","권철운","이승훈","권태국","윤종선","한동훈","박남주","남광현","김대현","원동섭","조항현"];
-  const DEPT_ALLOW = ["안전관리팀","안전기술팀","영업공무팀"];
-  addDatalist(nameI, NAME_ALLOW);
-  addDatalist(deptI, DEPT_ALLOW);
-
-  // 모바일에서 km 입력 시 자동 스크롤
-  odoI.addEventListener('focus',()=>{ setTimeout(()=>odoI.scrollIntoView({behavior:'smooth',block:'center'}),150); });
-
-  // 초기화
+// 초기화
 resetBtn.onclick = () => {
   localStorage.removeItem(keyN); localStorage.removeItem(keyD);
   nameSel.value=''; deptSel.value='';
   toast('저장된 이름/부서를 삭제했습니다.');
 };
-  
+
+// 모바일에서 km 입력 시 자동 스크롤
+odoI.addEventListener('focus',()=>{
+  setTimeout(()=>odoI.scrollIntoView({behavior:'smooth',block:'center'}),150);
+});
+
 // 제출
 submit.onclick = async () => {
   const userName = nameSel.value;
@@ -466,6 +470,45 @@ submit.onclick = async () => {
 
   localStorage.setItem(keyN, userName);
   localStorage.setItem(keyD, dept);
+
+  // 전송 직전: 해당 차량의 기존 건수 카운트
+  let beforeCount = 0;
+  await new Promise(res => fetchCsv(rows => {
+    beforeCount = rows.filter((r,i)=>i>0 && String(r[1]||'').toUpperCase()===vehicle).length;
+    res();
+  }, true));
+
+  // 전송 시작: 로딩 띄우고 입력 잠금
+  setLoading(true, '기록을 저장하는 중입니다…');
+
+  try{
+    // Webhook 전송
+    const resp = await fetch(WEBHOOK_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ vehicle, userName, dept, odo, memo })
+    });
+    if(!resp.ok) throw new Error('네트워크 오류');
+
+    // 시트 반영될 때까지 폴링 (최대 15초)
+    const ok = await waitUntilUpdated(vehicle, beforeCount, 15000);
+
+    // 입력창 초기화 & 즉시 반영 시도
+    odoI.value=''; memoI.value=''; odoI.focus();
+    refreshPrev(true);
+    loadHistory(vehicle, true);
+
+    // 자동 새로고침(추가 반영)
+    setTimeout(() => refreshAfterChange(vehicle), 1200);
+
+    toast(ok ? '전송 완료! ✅' : '전송은 완료, 반영 대기 중입니다.', ok);
+  }catch(e){
+    toast('전송 실패: ' + e.message, false);
+  }finally{
+    setLoading(false);
+  }
+};
+
 
   // 필수 검증
   if(!NAME_ALLOW.includes(userName)){ toast('성명은 목록에서 선택해주세요.', false); nameI.focus(); return; }
@@ -747,6 +790,7 @@ function ymdhm(d){
 </script>
 </body>
 </html>
+
 
 
 
