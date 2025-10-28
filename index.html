@@ -142,6 +142,47 @@ label.req::after{content:" *";color:#1b64da;font-weight:900}
 
 /* 삭제 버튼 작게 */
 .btn.small{padding:6px 10px;font-size:12px;cursor:pointer}
+
+/* ===== 차량 헤더(왼쪽 배지 2줄 + 오른쪽 설명 2줄) ===== */
+.head-card{display:flex;gap:12px;align-items:center}
+.vchip2{
+  width:90px;height:90px;border-radius:20px;
+  background:var(--chip);border:1px solid var(--chip-border);
+  color:#1e40af;display:flex;flex-direction:column;justify-content:center;align-items:center;
+  line-height:1.1;font-weight:900;box-shadow:0 4px 12px rgba(0,0,0,.04)
+}
+.vchip2 .plate{font-size:14px;white-space:nowrap}
+.vchip2 .vid{font-size:12px;opacity:.85}
+
+/* 오른쪽 설명: 작게 + 2줄 클램프 */
+.head-desc{
+  margin-left:auto;max-width:calc(100% - 110px);
+  font-size:12.5px;color:#4b5563;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden
+}
+
+/* ===== 최근기록 카드 레이아웃 (토스 느낌) ===== */
+.hitem{display:flex;gap:12px;align-items:center;padding:12px 4px;border-bottom:1px dashed var(--line)}
+.hitem:last-child{border-bottom:none}
+
+/* 왼쪽 원형 km 배지 */
+.kmcircle{
+  min-width:48px;min-height:48px;border-radius:50%;
+  background:#eef2ff;border:1.5px solid #c7d2fe;color:#1e40af;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:12px;box-shadow:0 4px 12px rgba(59,130,246,.08)
+}
+
+/* 가운데 본문 */
+.hcell{flex:1;min-width:0}
+.hrow1{display:flex;justify-content:space-between;gap:8px}
+.hrow1 .title{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hrow1 .metaR{color:#64748b;font-size:12px;white-space:nowrap}
+.hrow2{color:#6b7280;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* 삭제 버튼은 우측 작게 */
+.btn.small{padding:6px 10px;font-size:12px}
+  
+  
 </style>
 </head>
 <body>
@@ -264,11 +305,24 @@ function renderVehicle(vehicle){
   const page=el('#page'); page.innerHTML='';
 
   const head=ce('div',{className:'card',style:'display:flex;gap:10px;align-items:flex-start'});
-  head.append(ce('div',{className:'vehicle-chip',textContent:`${v.name||vehicle} · ${vehicle}`}));
-  const desc=ce('div',{className:'caption',style:'margin:0;align-self:center'});
-  desc.textContent='운행 후 km(숫자)와 운행목적(비고)을 입력해주세요. 이름/부서는 최초 1회만 저장됩니다.';
-  head.append(desc);
-  page.append(head);
+  
+  // === 헤더(왼쪽 배지: 차량번호/ID 2줄, 오른쪽 설명 2줄) ===
+const head = ce('div',{className:'card head-card'});
+
+const vchip = ce('div',{className:'vchip2'});
+vchip.innerHTML = `
+  <div class="plate">${v.name || vehicle}</div>
+  <div class="vid">${vehicle}</div>
+`;
+
+const desc = ce('div',{
+  className:'head-desc',
+  textContent:'운행 후 km(숫자)와 운행목적(비고)을 입력해주세요. 이름/부서는 최초 1회만 저장됩니다.'
+});
+
+head.append(vchip, desc);
+page.append(head);
+
 
   const card=ce('div',{className:'card'});
 
@@ -434,22 +488,28 @@ function renderRecentTab(){
     let cur=1;
     function draw(){
       const slice=items.slice((cur-1)*per,(cur-1)*per+per);
-      el('#recentList').innerHTML = slice.map(r=>{
-        const date=fmtDateSmart(r[0]||'');
-        const vid=r[1]||'';
-        const vname=(VEHICLES.find(v=>v.id===vid)?.name)||vid;
-        const name=r[4]||'', dept=r[8]||'';
-        const post=Number(r[5]||0), day=Number(r[6]||0), memo=r[7]||'';
-        const pre=(Number.isFinite(post)&&Number.isFinite(day))?(post-day):null;
-        return `
-          <div class="hitem">
-            <div class="kpill">${Number.isFinite(day)&&day>0?`${day}km`:'—'}</div>
-            <div class="hline" style="flex:1">
-              <div class="hmeta">${vname} · ${date}</div>
-              <div><strong style="font-weight:900">${name}</strong> · ${dept} · 주행후 ${post}km${pre!=null?` · 운행전 ${pre}km`:''}${memo?` · ${memo}`:''}</div>
-            </div>
-          </div>`;
-      }).join('') || '<div class="hmeta">기록이 없습니다.</div>';
+el('#recentList').innerHTML = slice.map(r=>{
+  const date  = fmtDateSmart(r[0]||'');
+  const vid   = r[1]||'';
+  const vname = (VEHICLES.find(v=>v.id===vid)?.name) || vid;
+  const name  = r[4]||'', dept=r[8]||'';
+  const post  = Number(r[5]||0);         // 주행후
+  const day   = Number(r[6]||0);         // 일운행(운행거리)
+  const memo  = r[7]||'';
+
+  return `
+    <div class="hitem">
+      <div class="kmcircle">${Number.isFinite(day)&&day>0 ? `${day}km` : '—'}</div>
+      <div class="hcell">
+        <div class="hrow1">
+          <div class="title">${name} · ${dept}</div>
+          <div class="metaR">주행후 ${post}km</div>
+        </div>
+        <div class="hrow2">${memo ? `${memo} · ` : ''}${vname} · ${date}</div>
+      </div>
+    </div>`;
+}).join('') || '<div class="hmeta">기록이 없습니다.</div>';
+
       pager.innerHTML='';
       for(let i=1;i<=maxPages;i++){
         const b=ce('button',{textContent:String(i)});
@@ -486,26 +546,34 @@ function renderMoreTab(){
 function loadHistory(vehicle,force){
   const body=el('#histBody'); if(!body) return;
   fetchCsv(rows=>{
-    const out=rows
-      .filter((r,i)=>i>0 && String(r[1]||'').trim().toUpperCase()===vehicle)
-      .slice(-30).reverse()
-      .map(r=>{
-        const date=fmtDateSmart(r[0]||'');
-        const name=r[4]||'', dept=r[8]||'', odo=r[5]||'', day=r[6]||'', memo=r[7]||'';
-        const tsRaw=r[0]||'';
-        return `
-          <div class="item">
-            <span class="k">${day?(day+'km'):'—'}</span>
-            <div style="flex:1;">
-              <div><strong>${name}</strong> · ${dept} · <span class="meta">${date}</span></div>
-              <div class="meta">주행후 ${odo}km${memo?' · '+memo:''}</div>
-            </div>
-            ${DELETE_URL?`
-            <button class="btn small" data-action="delete"
-              data-ts="${String(tsRaw).replace(/"/g,'&quot;')}"
-              data-vehicle="${vehicle}">삭제</button>`:''}
-          </div>`;
-      }).join('') || '<div class="item meta">기록이 없습니다.</div>';
+const out = rows
+  .filter((r,i)=> i>0 && String(r[1]||'').trim().toUpperCase()===vehicle)
+  .slice(-30).reverse()
+  .map(r=>{
+    const date = fmtDateSmart(r[0]||'');
+    const name = r[4]||'', dept=r[8]||'';
+    const post = Number(r[5]||0);      // 주행후
+    const day  = Number(r[6]||0);      // 운행거리
+    const memo = r[7]||'';
+    const tsRaw = r[0] || '';
+
+    return `
+      <div class="hitem">
+        <div class="kmcircle">${Number.isFinite(day)&&day>0 ? `${day}km` : '—'}</div>
+        <div class="hcell">
+          <div class="hrow1">
+            <div class="title">${name} · ${dept}</div>
+            <div class="metaR">주행후 ${post}km</div>
+          </div>
+          <div class="hrow2">${memo ? `${memo} · ` : ''}${date}</div>
+        </div>
+        ${DELETE_URL ? `
+          <button class="btn small" data-action="delete"
+            data-ts="${String(tsRaw).replace(/"/g,'&quot;')}"
+            data-vehicle="${vehicle}">삭제</button>` : ''}
+      </div>`;
+  }).join('') || '<div class="item meta">기록이 없습니다.</div>';
+
     body.innerHTML=out;
   },force);
 }
@@ -583,3 +651,4 @@ window.addEventListener('error',(e)=>{ const msg=e?.error?.message||e?.message||
 </script>
 </body>
 </html>
+
