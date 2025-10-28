@@ -26,7 +26,7 @@ body{
 
 .avatar{width:36px;height:36px;border-radius:8px;object-fit:cover;border:1px solid var(--line)} 
 
-/* 최근기록 폰트/줄간 간격 살짝 축소 */
+/* 최근기록 폰트/줄간 간격 살짝 축소 */ 
 .history{font-size:13px}
 .item{font-size:13px; line-height:1.35}
 .meta{font-size:12px}
@@ -297,7 +297,7 @@ function renderVehicle(vehicle){
   if(savedD) deptI.value=savedD;
 
   // 자동완성 제한(허용 목록)
-  const NAME_ALLOW = ["김학철","최종우","이승훈","윤종선","한동훈","박남주","남광현","조항현"];
+  const NAME_ALLOW = ["김학철","최종우","권철운","이승훈","권태국","윤종선","한동훈","박남주","남광현","김대현","원동섭","조항현"];
   const DEPT_ALLOW = ["안전관리팀","안전기술팀","영업공무팀"];
   addDatalist(nameI, NAME_ALLOW);
   addDatalist(deptI, DEPT_ALLOW);
@@ -448,9 +448,8 @@ function loadHistory(vehicle, force){
       .filter((r,i)=> i>0 && String(r[1]||'').trim().toUpperCase()===vehicle)
       .slice(-30).reverse()
       .map(r=>{
-        const date = fmtDateSmart(r[0]||'');
+        const date = fmtDateSmart(r[0]||'');   // ← 날짜 포맷 적용
         const name = r[4]||'', dept=r[8]||'', odo=r[5]||'', day=r[6]||'', memo=r[7]||'';
-        // A열(기록시각)은 시트에 보이는 문자열 그대로 delete에 사용해야 매칭됩니다.
         const tsRaw = r[0] || '';
         return `
           <div class="item">
@@ -459,13 +458,14 @@ function loadHistory(vehicle, force){
               <div><strong>${name}</strong> · ${dept} · <span class="meta">${date}</span></div>
               <div class="meta">주행후 ${odo}km${memo? ' · '+memo:''}</div>
             </div>
-            <button class="btn" style="padding:6px 10px;font-size:12px"
-              onclick="deleteAndRefresh(${JSON.stringify(tsRaw)}, ${JSON.stringify(vehicle)}, this)">삭제</button>
+            ${DELETE_URL ? `<button class="btn" style="padding:6px 10px;font-size:12px"
+              onclick="deleteAndRefresh(${JSON.stringify(tsRaw)}, ${JSON.stringify(vehicle)}, this)">삭제</button>` : ''}
           </div>`;
       }).join('') || '<div class="item meta">기록이 없습니다.</div>';
     body.innerHTML = out;
   }, force);
 }
+
 
 /* ===== CSV 공통 ===== */
 function fetchCsv(done,force){
@@ -538,6 +538,7 @@ function showContacts(){
 </script>
 </body>
 </html>
+
 
 
 
