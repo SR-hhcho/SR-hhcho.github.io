@@ -511,9 +511,10 @@ submit.onclick = async () => {
 
 
   // 필수 검증
-  if(!NAME_ALLOW.includes(userName)){ toast('성명은 목록에서 선택해주세요.', false); nameI.focus(); return; }
-  if(!DEPT_ALLOW.includes(dept)){ toast('부서는 목록에서 선택해주세요.', false);  deptI.focus(); return; }
-  if(!odo || isNaN(+odo)){ toast('운행 후 km(숫자)를 입력해주세요', false); odoI.focus(); return; }
+if (!NAME_ALLOW.includes(userName)) { toast('성명은 목록에서 선택해주세요.', false);  nameSel.focus(); return; }
+if (!DEPT_ALLOW.includes(dept))     { toast('부서는 목록에서 선택해주세요.', false); deptSel.focus(); return; }
+if (!odo || isNaN(+odo))            { toast('운행 후 km(숫자)를 입력해주세요', false);  odoI.focus();    return; }
+
 
   // 로컬 저장
   localStorage.setItem(keyN, userName);
@@ -821,6 +822,7 @@ window.addEventListener('error', (e) => {
 </script>
 </body>
 </html>
+
 
 
 
