@@ -699,8 +699,14 @@ function loadHistory(vehicle, force){
               <div><strong>${name}</strong> · ${dept} · <span class="meta">${date}</span></div>
               <div class="meta">주행후 ${odo}km${memo? ' · '+memo:''}</div>
             </div>
-            ${DELETE_URL ? `<button class="btn" style="padding:6px 10px;font-size:12px"
-              onclick="deleteAndRefresh(${JSON.stringify(tsRaw)}, ${JSON.stringify(vehicle)}, this)">삭제</button>` : ''}
+${DELETE_URL ? `
+  <button class="btn small"
+    data-action="delete"
+    data-ts="${String(tsRaw).replace(/"/g,'&quot;')}"
+    data-vehicle="${vehicle}">
+    삭제
+  </button>` : ''}
+
           </div>`;
       }).join('') || '<div class="item meta">기록이 없습니다.</div>';
     body.innerHTML = out;
@@ -728,7 +734,19 @@ function parseCSV(text){
 }
 
 /* ===== UI 헬퍼 ===== */
-function field(label,input){ const w=ce('div',{style:'flex:1'}); w.append(ce('label',{textContent:label}),input); return w; }
+function field(label,input){
+  const w=ce('div',{style:'flex:1'});
+  w.append(ce('label',{textContent:label}),input);
+  return w;
+}
+
+function fieldLabelled(labelText, inputEl, required=false){
+  const wrap = ce('div',{style:'flex:1'});
+  const lab = ce('label',{textContent:labelText, className: required ? 'req' : ''});
+  wrap.append(lab, inputEl);
+  return wrap;
+}
+
 function addDatalist(input, items){
   const id='dl_'+Math.random().toString(36).slice(2);
   const dl=ce('datalist',{id}); items.forEach(v=>dl.append(ce('option',{value:v}))); document.body.append(dl);
@@ -787,9 +805,20 @@ function ymdhm(d){
   return `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())}(${yoil}) ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+// 전역 클릭 리스너 (삭제 버튼용)
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-action="delete"]');
+  if (!b) return; // 클릭한 게 삭제버튼이 아니면 무시
+  const ts = b.getAttribute('data-ts');
+  const vehicle = b.getAttribute('data-vehicle');
+  deleteAndRefresh(ts, vehicle, b); // 기존 함수 실행
+});
+
+  
 </script>
 </body>
 </html>
+
 
 
 
