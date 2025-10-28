@@ -84,6 +84,37 @@ button.primary:active{background:var(--blue-press)}
 .plate{font-weight:900;font-size:15px}
 .idtag{font-size:11px;font-weight:800;color:#1e40af;background:#eef2ff;padding:2px 8px;border-radius:999px;border:1px solid #dbe6ff;align-self:flex-start}
 
+  /* 홈 타일 — 한 줄 유지 & 줄임표 */
+.tile{
+  display:flex;
+  justify-content:space-between; /* 좌우 정렬 */
+  align-items:center;
+}
+
+/* 왼쪽 묶음(이미지+차량명) */
+.tile-left{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;                 /* ★ 줄임표가 먹게 하는 핵심 */
+}
+
+/* 차량명은 한 줄 + 넘치면 … */
+.plate{
+  font-weight:900;
+  font-size:15px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:60vw;              /* 필요 시 55~65vw로 조절 */
+}
+
+/* ID 태그도 줄바꿈 금지 */
+.idtag{
+  white-space:nowrap;
+}
+
+
 /* 히스토리 카드(차량 페이지) */
 .history{margin:8px 12px 84px;padding:10px;border:1px solid var(--line);border-radius:14px;background:#fff}
 .hitem{display:flex;gap:10px;align-items:flex-start;padding:10px 4px;border-bottom:1px dashed var(--line)}
@@ -112,8 +143,19 @@ button.primary:active{background:var(--blue-press)}
 
 /* 토스트 */
 .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#fff;border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.08);padding:10px 12px;border-radius:12px;font-size:14px;display:none}
-.toast.ok{border-color:#b2f2bb;color:#0c7;display:block}
-.toast.err{border-color:#ffc9c9;color:var(--err);display:block}
+.toast.ok{
+  border-color:#b2f2bb;
+  color:#0c7;
+  background:#f6fffa;   /* 성공: 연한 그린 배경 */
+  display:block;
+}
+.toast.err{
+  border-color:#ffc9c9;
+  color:#d11;
+  background:#fff5f5;   /* 실패: 연한 레드 배경 */
+  display:block;
+}
+
 
 .avatar{width:36px;height:36px;border-radius:8px;object-fit:cover;border:1px solid var(--line)}
 
@@ -287,7 +329,8 @@ function renderHome(){
       else this.remove();
     };
 
-    var left = ce('div',{style:'display:flex;align-items:center;gap:10px'});
+    var left = ce('div',{className:'tile-left'});
+
     left.append(img, ce('span',{className:'plate',textContent:(v.name||'')}));
     var right = ce('span',{className:'idtag',textContent:v.id});
     a.append(left, right);
@@ -655,6 +698,7 @@ function ymdhm(d){
 </script>
 </body>
 </html>
+
 
 
 
