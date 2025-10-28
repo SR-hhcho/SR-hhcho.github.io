@@ -301,30 +301,32 @@ function renderHome(){
 
 /* ===== 차량 페이지 ===== */
 function renderVehicle(vehicle){
-  const v=VEHICLES.find(x=>x.id===vehicle)||{id:vehicle,name:''};
-  const page=el('#page'); page.innerHTML='';
+  const v = VEHICLES.find(x=>x.id===vehicle) || {id:vehicle,name:''};
+  const page = el('#page'); 
+  page.innerHTML='';
 
-  const head=ce('div',{className:'card',style:'display:flex;gap:10px;align-items:flex-start'});
-  
   // === 헤더(왼쪽 배지: 차량번호/ID 2줄, 오른쪽 설명 2줄) ===
-const head = ce('div',{className:'card head-card'});
+  const head = ce('div',{className:'card head-card'});
 
-const vchip = ce('div',{className:'vchip2'});
-vchip.innerHTML = `
-  <div class="plate">${v.name || vehicle}</div>
-  <div class="vid">${vehicle}</div>
-`;
+  const vchip = ce('div',{className:'vchip2'});
+  vchip.innerHTML = `
+    <div class="plate">${v.name || vehicle}</div>
+    <div class="vid">${vehicle}</div>
+  `;
 
-const desc = ce('div',{
-  className:'head-desc',
-  textContent:'운행 후 km(숫자)와 운행목적(비고)을 입력해주세요. 이름/부서는 최초 1회만 저장됩니다.'
-});
+  const desc = ce('div',{
+    className:'head-desc',
+    textContent:'운행 후 km(숫자)와 운행목적(비고)을 입력해주세요. 이름/부서는 최초 1회만 저장됩니다.'
+  });
 
-head.append(vchip, desc);
-page.append(head);
+  head.append(vchip, desc);
+  page.append(head);
 
+  // ↓ (이 아래부터 기존 코드 계속)
+  const card = ce('div',{className:'card'});
+  // ... 성명/부서/운행후/비고 입력 영역 등 기존 로직 유지
+}
 
-  const card=ce('div',{className:'card'});
 
   // 성명/부서 (Select)
   const row=ce('div',{className:'row'});
@@ -651,4 +653,5 @@ window.addEventListener('error',(e)=>{ const msg=e?.error?.message||e?.message||
 </script>
 </body>
 </html>
+
 
