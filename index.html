@@ -27,12 +27,11 @@ body{
 .avatar{width:36px;height:36px;border-radius:8px;object-fit:cover;border:1px solid var(--line)} 
 
 /* 최근기록 폰트/줄간 간격 살짝 축소 */ 
-.history{font-size:13px}
-.item{font-size:13px; line-height:1.35}
-.meta{font-size:12px}
-.k{font-size:11px; padding:2px 7px}
+.history{font-size:12.5px}
+.item{font-size:12.5px; line-height:1.28}
+.meta{font-size:11.5px}
+.k{font-size:11px; padding:2px 6px}
 
-  
 /* 앱바 */
 .appbar{position:sticky;top:0;z-index:60;height:56px;background:#fff;border-bottom:1px solid var(--line);
   display:grid;grid-template-columns:56px 1fr 56px;align-items:center}
@@ -369,71 +368,60 @@ function renderVehicle(vehicle){
   // 초기화
   resetBtn.onclick=()=>{localStorage.removeItem(keyN);localStorage.removeItem(keyD);nameI.value='';deptI.value='';toast('저장된 이름/부서를 삭제했습니다.');};
 
-// 제출  (교체본)
+// 제출
 submit.onclick = async () => {
-  const NAME_ALLOW = ["김학철","최종우","권철운","이승훈","권태국","윤종선","한동훈","박남주","남광현","김대현","원동섭","조항현"];
-  const DEPT_ALLOW = ["안전관리팀","안전기술팀","영업공무팀"];
-
   const userName = nameI.value.trim();
   const dept     = deptI.value.trim();
   const odo      = odoI.value.trim();
   const memo     = memoI.value.trim();
 
-  // 입력 검증
-  if (!NAME_ALLOW.includes(userName)) { toast('성명은 목록에서 선택해주세요.', false); nameI.focus(); return; }
-  if (!DEPT_ALLOW.includes(dept))     { toast('부서는 목록에서 선택해주세요.', false);  deptI.focus();   return; }
-  if (!odo || isNaN(+odo))            { toast('운행 후 km(숫자)를 입력해주세요', false);     odoI.focus();    return; }
+  // 필수 검증
+  if(!NAME_ALLOW.includes(userName)){ toast('성명은 목록에서 선택해주세요.', false); nameI.focus(); return; }
+  if(!DEPT_ALLOW.includes(dept)){ toast('부서는 목록에서 선택해주세요.', false);  deptI.focus(); return; }
+  if(!odo || isNaN(+odo)){ toast('운행 후 km(숫자)를 입력해주세요', false); odoI.focus(); return; }
 
   // 로컬 저장
-  localStorage.setItem('drive_userName', userName);
-  localStorage.setItem('drive_dept',     dept);
+  localStorage.setItem(keyN, userName);
+  localStorage.setItem(keyD, dept);
 
-  // 전송 전: 해당 차량 기존 로그 건수 스냅샷
-  const beforeCount = await new Promise(res => {
-    fetchCsv(rows => {
-      const c = rows.filter((r,i)=> i>0 && String(r[1]||'').toUpperCase()===vehicle).length;
-      res(c);
-    }, true);
-  });
+  // 전송 직전: 해당 차량의 기존 건수 카운트
+  let beforeCount = 0;
+  await new Promise(res => fetchCsv(rows => {
+    beforeCount = rows.filter((r,i)=>i>0 && String(r[1]||'').toUpperCase()===vehicle).length;
+    res();
+  }, true));
 
-  submit.disabled = true;
-  setLoading(true, '기록 전송 중…');
+  // 전송 시작: 로딩 띄우고 입력 잠금
+  setLoading(true, '기록을 저장하는 중입니다…');
 
-  try {
-    // Make 웹훅으로 전송
-    const r = await fetch(WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json' },
+  try{
+    // Webhook 전송
+    const resp = await fetch(WEBHOOK_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ vehicle, userName, dept, odo, memo })
     });
-    if (!r.ok) throw new Error('네트워크 오류');
+    if(!resp.ok) throw new Error('네트워크 오류');
 
-    // 시트 반영 대기 (최대 15초)
+    // 시트 반영될 때까지 폴링 (최대 15초)
     const ok = await waitUntilUpdated(vehicle, beforeCount, 15000);
 
-if (ok) {
-  toast('전송 완료! ✅', true);
-  odoI.value = '';
-  memoI.value = '';
-  odoI.focus();
+    // 입력창 초기화 & 즉시 반영 시도
+    odoI.value=''; memoI.value=''; odoI.focus();
+    refreshPrev(true);
+    loadHistory(vehicle, true);
 
-  // 운행 전 km/히스토리 즉시 갱신
-  refreshPrev(true);
-  loadHistory(vehicle, true);
+    // 자동 새로고침(추가 반영)
+    setTimeout(() => refreshAfterChange(vehicle), 1200);
 
-  // ✅ 추가: 1.5초 후 자동 새로고침 (주행전 km, 최근기록, 시트 등 전체 반영)
-  setTimeout(() => refreshAfterChange(vehicle), 1500);
-} else {
-  toast('전송은 완료되었으나 반영이 지연 중입니다. 잠시 후 다시 확인해주세요.', false);
-}
-
-  } catch (e) {
+    toast(ok ? '전송 완료! ✅' : '전송은 완료, 반영 대기 중입니다.', ok);
+  }catch(e){
     toast('전송 실패: ' + e.message, false);
-  } finally {
+  }finally{
     setLoading(false);
-    submit.disabled = false;
   }
 };
+
 
 
   // 운행 전 km 표시
@@ -508,17 +496,24 @@ function renderRecentTab(){
     let cur=1;
     function draw(){
       const slice=items.slice((cur-1)*per,(cur-1)*per+per);
-      el('#recentList').innerHTML=slice.map(r=>{
-        const date=fmtDate(r[0]||''), vid=r[1]||'', vname=(VEHICLES.find(v=>v.id===vid)?.name)||vid;
-        const name=r[4]||'', dept=r[8]||'', odo=r[5]||'', day=r[6]||'', memo=r[7]||'';
-        return `<div class="hitem">
-          <div class="kpill">${day?`${day}km`:'—'}</div>
-          <div class="hline">
-            <div class="hmeta">${vname} · ${date}</div>
-            <div><strong style="font-weight:900">${name}</strong> · ${dept} · 주행후 ${odo}km${memo?` · ${memo}`:''}</div>
-          </div>
-        </div>`;
-      }).join('') || '<div class="hmeta">기록이 없습니다.</div>';
+   el('#recentList').innerHTML = slice.map(r=>{
+  const date = fmtDateSmart(r[0]||'');
+  const vid  = r[1]||'';
+  const vname= (VEHICLES.find(v=>v.id===vid)?.name) || vid;
+  const name = r[4]||'', dept=r[8]||'';
+  const post = Number(r[5]||0), day=Number(r[6]||0), memo=r[7]||'';
+  const pre  = (Number.isFinite(post) && Number.isFinite(day)) ? (post - day) : null;
+
+  return `
+    <div class="hitem">
+      <div class="kpill">${Number.isFinite(day) && day>0 ? `${day}km` : '—'}</div>
+      <div class="hline" style="flex:1">
+        <div class="hmeta">${vname} · ${date}</div>
+        <div><strong style="font-weight:900">${name}</strong> · ${dept} · 주행후 ${post}km${pre!=null ? ` · 운행전 ${pre}km` : ''}${memo ? ` · ${memo}` : ''}</div>
+      </div>
+    </div>`;
+}).join('') || '<div class="hmeta">기록이 없습니다.</div>';
+
       pager.innerHTML='';
       for(let i=1;i<=maxPages;i++){
         const b=ce('button',{textContent:String(i)});
@@ -623,32 +618,44 @@ function showContacts(){
     if (location.hash === '#recent') { renderRecentTab(); }
   }
 
-  function fmtDateSmart(s){
-    // Date 객체 그대로인 경우
-    if (s instanceof Date && !isNaN(s)) return ymdhm(s);
+function fmtDateSmart(s){
+  // Date 객체
+  if (s instanceof Date && !isNaN(s)) return ymdhm(s);
 
-    // 숫자(시리얼) → 날짜
-    if (/^\d+(\.\d+)?$/.test(String(s))) {
-      const d = new Date(Math.round((Number(s) - 25569)*86400*1000)); // Excel serial 보정
-      if (!isNaN(d)) return ymdhm(d);
-    }
-
-    // 일반 문자열 파싱
-    const d2 = new Date(s);
-    if (!isNaN(d2)) return ymdhm(d2);
-
-    // 실패 시 원문 그대로
-    return String(s);
+  // Google 시리얼 숫자
+  if (/^\d+(\.\d+)?$/.test(String(s))) {
+    const d = new Date(Math.round((Number(s) - 25569) * 86400 * 1000));
+    if (!isNaN(d)) return ymdhm(d);
   }
-  function ymdhm(d){
-    const yoil = ['일','월','화','수','목','금','토'][d.getDay()];
-    const pad = n => String(n).padStart(2,'0');
-    return `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())}(${yoil}) ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
+  // "2025년 10월 16일 오전 12:30" 형태 파싱
+  const kr = String(s).trim();
+  const m = kr.match(/^(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일\s*(오전|오후)\s*(\d{1,2}):(\d{2})/);
+  if (m){
+    let [_, y, mo, d, ap, h, mi] = m;
+    y=+y; mo=+mo; d=+d; h=+h; mi=+mi;
+    if (ap==='오후' && h<12) h+=12;
+    if (ap==='오전' && h===12) h=0;
+    const dt = new Date(y, mo-1, d, h, mi);
+    if(!isNaN(dt)) return ymdhm(dt);
   }
-  
+
+  // ISO/기타 파싱 시도
+  const d2 = new Date(s);
+  if (!isNaN(d2)) return ymdhm(d2);
+
+  return String(s);
+}
+function ymdhm(d){
+  const yoil = ['일','월','화','수','목','금','토'][d.getDay()];
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())}(${yoil}) ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 </script>
 </body>
 </html>
+
 
 
 
