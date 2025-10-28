@@ -118,7 +118,29 @@ button.primary:active{background:var(--blue-press)}
 
 .avatar{width:36px;height:36px;border-radius:8px;object-fit:cover;border:1px solid var(--line)}
 
-  
+/* === 로딩 오버레이 === */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.35);
+  display: none; align-items: center; justify-content: center;
+  z-index: 9999;
+}
+.overlay.show { display: flex; }
+.overlay .box {
+  background: #fff; padding: 18px 20px; border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.12);
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  min-width: 220px;
+}
+.spinner {
+  width: 28px; height: 28px; border: 3px solid #e5e8eb;
+  border-top-color: #1b64da; border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.overlay .msg { font-weight: 700; font-size: 14px; color:#111; }
+.overlay .sub { font-size: 12px; color:#6b7684; text-align:center; }
+
 </style>
 </head>
 <body>
@@ -174,6 +196,35 @@ function refreshAfterChange(vehicle){
     if (location.hash === '#recent') { renderRecentTab(); } // 최근기록 탭 열려 있으면 재그리기
   }
 
+function setLoading(on, msg) {
+  const ov = document.getElementById('overlay');
+  if (!ov) return;
+  ov.classList.toggle('show', !!on);
+  if (msg) ov.querySelector('.msg').textContent = msg;
+  // 입력 잠금
+  const dis = !!on;
+  document.querySelectorAll('input, textarea, button').forEach(el => {
+    if (el.id !== 'overlay') el.disabled = dis;
+  });
+}
+
+function waitUntilUpdated(vehicle, beforeCount, timeoutMs=12000) {
+  // CSV를 계속 폴링하며 해당 vehicle 건수가 증가하면 resolve
+  const started = Date.now();
+  return new Promise((resolve, reject) => {
+    const tick = () => {
+      fetchCsv(rows => {
+        const cnt = rows.filter((r,i)=> i>0 && String(r[1]||'').toUpperCase()===vehicle).length;
+        if (cnt > beforeCount) return resolve(true);
+        if (Date.now() - started > timeoutMs) return resolve(false); // 타임아웃은 실패로 처리
+        setTimeout(tick, 800);
+      }, /*force*/ true);
+    };
+    tick();
+  });
+}
+
+  
   async function deleteAndRefresh(ts, vehicle, btn){
     if (!DELETE_URL){ toast('삭제URL 미설정', false); return; }
     if (!confirm('이 기록을 삭제할까요?')) return;
@@ -538,6 +589,7 @@ function showContacts(){
 </script>
 </body>
 </html>
+
 
 
 
