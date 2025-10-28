@@ -6,7 +6,6 @@
 <meta name="theme-color" content="#1b64da" />
 <title>업무용 운행기록</title>
 
-<!-- Pretendard -->
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css"/>
 
@@ -26,7 +25,7 @@ body{
 
 .avatar{width:36px;height:36px;border-radius:8px;object-fit:cover;border:1px solid var(--line)} 
 
-/* 최근기록 폰트/줄간 간격 살짝 축소 */ 
+/* 최근기록 컴팩트 */
 .history{font-size:12.5px}
 .item{font-size:12.5px; line-height:1.28}
 .meta{font-size:11.5px}
@@ -58,7 +57,7 @@ input,textarea,select{
   background:#fff;outline:none;transition:border .15s,box-shadow .15s;font-family:inherit
 }
 input:focus,textarea:focus,select:focus{border-color:#b4c6ff;box-shadow:0 0 0 3px rgba(27,100,218,.15)}
-textarea{height:44px;resize:none} /* 1줄 높이로 고정 */
+textarea{height:44px;resize:none} /* 1줄 고정 */
 
 /* 운행전 km 배지 (입력 아래 왼쪽) */
 .prevkm{display:inline-flex;align-items:center;gap:6px;background:var(--chip);color:#1e40af;
@@ -84,36 +83,11 @@ button.primary:active{background:var(--blue-press)}
 .plate{font-weight:900;font-size:15px}
 .idtag{font-size:11px;font-weight:800;color:#1e40af;background:#eef2ff;padding:2px 8px;border-radius:999px;border:1px solid #dbe6ff;align-self:flex-start}
 
-  /* 홈 타일 — 한 줄 유지 & 줄임표 */
-.tile{
-  display:flex;
-  justify-content:space-between; /* 좌우 정렬 */
-  align-items:center;
-}
-
-/* 왼쪽 묶음(이미지+차량명) */
-.tile-left{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  min-width:0;                 /* ★ 줄임표가 먹게 하는 핵심 */
-}
-
-/* 차량명은 한 줄 + 넘치면 … */
-.plate{
-  font-weight:900;
-  font-size:15px;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  max-width:60vw;              /* 필요 시 55~65vw로 조절 */
-}
-
-/* ID 태그도 줄바꿈 금지 */
-.idtag{
-  white-space:nowrap;
-}
-
+/* 홈 타일 — 한 줄 유지 & 줄임표 */
+.tile{display:flex;justify-content:space-between;align-items:center;}
+.tile-left{display:flex;align-items:center;gap:10px;min-width:0;}
+.plate{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60vw;}
+.idtag{white-space:nowrap}
 
 /* 히스토리 카드(차량 페이지) */
 .history{margin:8px 12px 84px;padding:10px;border:1px solid var(--line);border-radius:14px;background:#fff}
@@ -143,76 +117,31 @@ button.primary:active{background:var(--blue-press)}
 
 /* 토스트 */
 .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#fff;border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.08);padding:10px 12px;border-radius:12px;font-size:14px;display:none}
-.toast.ok{
-  border-color:#b2f2bb;
-  color:#0c7;
-  background:#f6fffa;   /* 성공: 연한 그린 배경 */
-  display:block;
-}
-.toast.err{
-  border-color:#ffc9c9;
-  color:#d11;
-  background:#fff5f5;   /* 실패: 연한 레드 배경 */
-  display:block;
-}
-
-
-.avatar{width:36px;height:36px;border-radius:8px;object-fit:cover;border:1px solid var(--line)}
+.toast.ok{border-color:#b2f2bb;color:#0c7;background:#f6fffa;display:block}
+.toast.err{border-color:#ffc9c9;color:#d11;background:#fff5f5;display:block}
 
 /* === 로딩 오버레이 === */
-.overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,.35);
-  display: none; align-items: center; justify-content: center;
-  z-index: 9999;
-}
-.overlay.show { display: flex; }
-.overlay .box {
-  background: #fff; padding: 18px 20px; border-radius: 14px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.12);
-  display: flex; flex-direction: column; align-items: center; gap: 10px;
-  min-width: 220px;
-}
-.spinner {
-  width: 28px; height: 28px; border: 3px solid #e5e8eb;
-  border-top-color: #1b64da; border-radius: 50%;
-  animation: spin 0.9s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.overlay .msg { font-weight: 700; font-size: 14px; color:#111; }
-.overlay .sub { font-size: 12px; color:#6b7684; text-align:center; }
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:9999}
+.overlay.show{display:flex}
+.overlay .box{background:#fff;padding:18px 20px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.12);display:flex;flex-direction:column;align-items:center;gap:10px;min-width:220px}
+.spinner{width:28px;height:28px;border:3px solid #e5e8eb;border-top-color:#1b64da;border-radius:50%;animation:spin .9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.overlay .msg{font-weight:700;font-size:14px;color:#111}
+.overlay .sub{font-size:12px;color:#6b7684;text-align:center}
 
-/* 드롭다운(Select) 스타일 - 앱 전체 톤 앤 매너 */
-select.select {
-  width:100%;
-  appearance:none;
-  background:#fff url('data:image/svg+xml;utf8,<svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="%236b7684" d="M7 10l5 5 5-5z"/></svg>') no-repeat right 10px center / 16px;
-  border:1px solid var(--line);
-  border-radius:12px;
-  padding:12px 36px 12px 12px;
-  font-size:15px; /* 이름 3글자, 부서 5글자 기준 살짝 컴팩트 */
-  font-family:inherit;
+/* 드롭다운(Select) */
+select.select{
+  width:100%;appearance:none;
+  background:#fff url('data:image/svg+xml;utf8,<svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="%236b7684" d="M7 10l5 5 5-5z"/></svg>') no-repeat right 10px center/16px;
+  border:1px solid var(--line);border-radius:12px;padding:12px 36px 12px 12px;font-size:15px;font-family:inherit
 }
-select.select:focus {
-  border-color:#b4c6ff;
-  box-shadow:0 0 0 3px rgba(27,100,218,.15);
-}
+select.select:focus{border-color:#b4c6ff;box-shadow:0 0 0 3px rgba(27,100,218,.15)}
 
-/* 라벨에 파란 * 표기 */
-label.req::after{
-  content:" *";
-  color:#1b64da;
-  font-weight:900;
-}
+/* 라벨에 파란 * */
+label.req::after{content:" *";color:#1b64da;font-weight:900}
 
-/* 삭제 버튼 클릭감을 확실히 */
-.btn.small {
-  padding:6px 10px;
-  font-size:12px;
-  cursor:pointer;
-}
-
-  
+/* 삭제 버튼 작게 */
+.btn.small{padding:6px 10px;font-size:12px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -226,15 +155,14 @@ label.req::after{
   <div id="page"></div>
   <div id="toast" class="toast"></div>
 
+  <!-- 로딩 오버레이 -->
   <div id="overlay" class="overlay" aria-hidden="true">
-  <div class="box">
-    <div class="spinner"></div>
-    <div class="msg">처리 중…</div>
-    <div class="sub">서버가 기록을 저장하는 중입니다.<br>잠시만 기다려주세요.</div>
+    <div class="box">
+      <div class="spinner"></div>
+      <div class="msg">처리 중…</div>
+      <div class="sub">서버가 기록을 저장하는 중입니다.<br>잠시만 기다려주세요.</div>
+    </div>
   </div>
-</div>
-
-  
 </div>
 
 <!-- 하단 탭 -->
@@ -246,144 +174,95 @@ label.req::after{
 </nav>
 
 <script>
-/* ===== 설정 (여기만 바꿔주면 됨) ===== */
-const WEBHOOK_URL  = "https://hook.us2.make.com/95cj2g36m4tsgu82h1bu41gf4swboiks";         // 등록용
-const DELETE_URL   = "https://hook.us2.make.com/j2naw84osfkadkga7xkrljj8ep6rvroh";   // 삭제용(아래 안내)
+/* ===== 설정 ===== */
+const WEBHOOK_URL  = "https://hook.us2.make.com/95cj2g36m4tsgu82h1bu41gf4swboiks";
+const DELETE_URL   = "https://hook.us2.make.com/j2naw84osfkadkga7xkrljj8ep6rvroh";
 const LOGS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTLnxKDu-UGxyHZ86d5HS6G9_aFRvD5TEYFyMmqR-oFogtT1iNvhB08_BciXL2KsepJ_VihsO4qHVnF/pub?gid=0&single=true&output=csv";
-const CONTACTS_CSV_URL = ""; // (선택) 담당자 메일리스트 CSV 퍼블릭 주소 넣으면 더보기 탭에 표시
+const CONTACTS_CSV_URL = "";
 
-
-  
-// 차량 등록 (작은 이미지가 있으면 img에 경로)
+/* 차량 등록 */
 const VEHICLES = [
   { id:"V001", name:"806조8193", img:"img/V001.jpg" },
   { id:"V002", name:"81두1166", img:"img/V002.jpg" },
   { id:"V003", name:"804너3147", img:"img/V003.jpg" }
 ];
 
-// 허용 목록 (여기에만 추가/수정하면 드롭다운에 반영됩니다)
+/* 허용 목록(전역) */
 const NAME_ALLOW = ["김학철","최종우","권철운","이승훈","권태국","윤종선","한동훈","박남주","남광현","김대현","원동섭","조항현"];
 const DEPT_ALLOW = ["안전관리팀","안전기술팀","영업공무팀"];
-
 
 /* ===== 유틸 ===== */
 const el=(s,p=document)=>p.querySelector(s);
 const ce=(t,o={})=>Object.assign(document.createElement(t),o);
 const toast=(m,ok=true)=>{const t=el('#toast');t.textContent=m;t.className='toast '+(ok?'ok':'err');setTimeout(()=>t.className='toast',2200);};
-const fmtDate=(iso)=>{ // 'YYYY/MM/DD(요일) HH:mm'
-  const d=new Date(iso||Date.now());
-  const yo=['일','월','화','수','목','금','토'][d.getDay()];
-  const z=n=>String(n).padStart(2,'0');
-  return `${d.getFullYear()}/${z(d.getMonth()+1)}/${z(d.getDate())}(${yo}) ${z(d.getHours())}:${z(d.getMinutes())}`;
-};
+const fmtDate=(iso)=>{const d=new Date(iso||Date.now());const yo=['일','월','화','수','목','금','토'][d.getDay()];const z=n=>String(n).padStart(2,'0');return `${d.getFullYear()}/${z(d.getMonth()+1)}/${z(d.getDate())}(${yo}) ${z(d.getHours())}:${z(d.getMinutes())}`;};
 function setTab(name){['home','sheet','recent','more'].forEach(k=>el('#tab-'+k)?.classList.toggle('on',k===name));}
 function section(title){return ce('div',{className:'section-title',textContent:title});}
-function refreshAfterChange(vehicle){
-    if (vehicle) { loadHistory(vehicle, true); }   // 차량 화면이면 해당 히스토리 갱신
-    if (location.hash === '#recent') { renderRecentTab(); } // 최근기록 탭 열려 있으면 재그리기
-  }
+function setLoading(on,msg){const ov=el('#overlay');if(!ov) return;ov.classList.toggle('show',!!on);if(msg) ov.querySelector('.msg').textContent=msg;document.querySelectorAll('input,textarea,button,select').forEach(e=>e.disabled=!!on);}
 
-function setLoading(on, msg) {
-  const ov = document.getElementById('overlay');
-  if (!ov) return;
-  ov.classList.toggle('show', !!on);
-  if (msg) ov.querySelector('.msg').textContent = msg;
-  // 입력 잠금
-  const dis = !!on;
-  document.querySelectorAll('input, textarea, button').forEach(el => {
-    if (el.id !== 'overlay') el.disabled = dis;
-  });
-}
-
-function waitUntilUpdated(vehicle, beforeCount, timeoutMs=12000) {
-  // CSV를 계속 폴링하며 해당 vehicle 건수가 증가하면 resolve
-  const started = Date.now();
-  return new Promise((resolve, reject) => {
-    const tick = () => {
-      fetchCsv(rows => {
-        const cnt = rows.filter((r,i)=> i>0 && String(r[1]||'').toUpperCase()===vehicle).length;
-        if (cnt > beforeCount) return resolve(true);
-        if (Date.now() - started > timeoutMs) return resolve(false); // 타임아웃은 실패로 처리
-        setTimeout(tick, 800);
-      }, /*force*/ true);
-    };
+function waitUntilUpdated(vehicle,beforeCount,timeoutMs=12000){
+  const started=Date.now();
+  return new Promise((resolve)=>{
+    const tick=()=>fetchCsv(rows=>{
+      const cnt=rows.filter((r,i)=>i>0 && String(r[1]||'').toUpperCase()===vehicle).length;
+      if(cnt>beforeCount) return resolve(true);
+      if(Date.now()-started>timeoutMs) return resolve(false);
+      setTimeout(tick,800);
+    },true);
     tick();
   });
 }
 
-  
-  async function deleteAndRefresh(ts, vehicle, btn){
-    if (!DELETE_URL){ toast('삭제URL 미설정', false); return; }
-    if (!confirm('이 기록을 삭제할까요?')) return;
+async function deleteAndRefresh(ts, vehicle, btn){
+  if(!DELETE_URL){ toast('삭제URL 미설정',false); return; }
+  if(!confirm('이 기록을 삭제할까요?')) return;
+  try{
+    btn && (btn.disabled=true);
+    const r=await fetch(DELETE_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ts,vehicle})});
+    if(!r.ok) throw new Error('삭제 실패');
+    toast('삭제 완료');
+    setTimeout(()=>refreshAfterChange(vehicle),700);
+  }catch(e){ toast('삭제 오류: '+e.message,false); }
+  finally{ btn && (btn.disabled=false); }
+}
 
-    try{
-      if (btn) btn.disabled = true;
-      const r = await fetch(DELETE_URL,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ ts, vehicle })
-      });
-      if(!r.ok) throw new Error('삭제 실패');
-      toast('삭제 완료');
-      // 0.7초 쉬고 최신 데이터 반영
-      setTimeout(function(){ refreshAfterChange(vehicle); }, 700);
-    }catch(e){
-      toast('삭제 오류: '+e.message, false);
-    }finally{
-      if (btn) btn.disabled = false;
-    }
-  }
-  
-/* ===== 라우터 (해시 기반: #/, #/V001, #/sheet ...) ===== */
+/* ===== 라우터 ===== */
 function route(){
-  const seg = (location.hash||'#/').slice(2).split('/').filter(Boolean);
-  const first = seg[0]||'';
-  if (!first) { renderHome(); setTab('home'); return; }
-  if (first==='sheet'){ renderSheetTab(); setTab('sheet'); return; }
-  if (first==='recent'){ renderRecentTab(); setTab('recent'); return; }
-  if (first==='more'){ renderMoreTab(); setTab('more'); return; }
-  // 차량 ID로 간주
+  const seg=(location.hash||'#/').slice(2).split('/').filter(Boolean);
+  const first=seg[0]||'';
+  if(!first){ renderHome(); setTab('home'); return; }
+  if(first==='sheet'){ renderSheetTab(); setTab('sheet'); return; }
+  if(first==='recent'){ renderRecentTab(); setTab('recent'); return; }
+  if(first==='more'){ renderMoreTab(); setTab('more'); return; }
   renderVehicle(first.toUpperCase()); setTab('home');
 }
 window.addEventListener('hashchange',route);
+if(!location.hash) location.hash = '#/';
 route();
 
 /* ===== 홈 ===== */
 function renderHome(){
-  var page = el('#page'); page.innerHTML = '';
-  var p1 = ce('p',{className:'caption',textContent:'차량을 선택해 기록하세요.'});
-
-  var grid = ce('div',{className:'list'});
-  VEHICLES.forEach(function(v){
-    var a = ce('a',{className:'tile', href: '#/' + encodeURIComponent(v.id)});
-
-    var img = ce('img',{className:'avatar', src: v.img || ''});
-    img.onerror = function(){
-      const s = this.src;
-      if (/\.png$/i.test(s)) this.src = s.replace(/\.png$/i,'.jpg');
-      else if (/\.jpg$/i.test(s)) this.src = s.replace(/\.jpg$/i,'.png');
-      else this.remove();
-    };
-
-    var left = ce('div',{className:'tile-left'});
-
-    left.append(img, ce('span',{className:'plate',textContent:(v.name||'')}));
-    var right = ce('span',{className:'idtag',textContent:v.id});
-    a.append(left, right);
+  const page=el('#page'); page.innerHTML='';
+  const p1=ce('p',{className:'caption',textContent:'차량을 선택해 기록하세요.'});
+  const grid=ce('div',{className:'list'});
+  VEHICLES.forEach(v=>{
+    const a=ce('a',{className:'tile',href:'#/'+encodeURIComponent(v.id)});
+    const img=ce('img',{className:'avatar',src:v.img||''});
+    img.onerror=function(){const s=this.src;if(/\.png$/i.test(s)) this.src=s.replace(/\.png$/i,'.jpg'); else if(/\.jpg$/i.test(s)) this.src=s.replace(/\.jpg$/i,'.png'); else this.remove();};
+    const left=ce('div',{className:'tile-left'});
+    left.append(img,ce('span',{className:'plate',textContent:(v.name||'')}));
+    const right=ce('span',{className:'idtag',textContent:v.id});
+    a.append(left,right);
     grid.append(a);
   });
-
-  page.append(p1, grid);
+  page.append(p1,grid);
 }
-
-
 
 /* ===== 차량 페이지 ===== */
 function renderVehicle(vehicle){
   const v=VEHICLES.find(x=>x.id===vehicle)||{id:vehicle,name:''};
   const page=el('#page'); page.innerHTML='';
 
-  // 상단 요약(차량 왼쪽, 설명 오른쪽)
   const head=ce('div',{className:'card',style:'display:flex;gap:10px;align-items:flex-start'});
   head.append(ce('div',{className:'vehicle-chip',textContent:`${v.name||vehicle} · ${vehicle}`}));
   const desc=ce('div',{className:'caption',style:'margin:0;align-self:center'});
@@ -391,38 +270,31 @@ function renderVehicle(vehicle){
   head.append(desc);
   page.append(head);
 
-  // 입력 카드
   const card=ce('div',{className:'card'});
 
-// --- 성명/부서 (Select UI) ---
-const row = ce('div',{className:'row'});
+  // 성명/부서 (Select)
+  const row=ce('div',{className:'row'});
+  const nameSel=ce('select',{id:'userName',className:'select'});
+  nameSel.append(ce('option',{value:'',textContent:'성명 선택'}));
+  NAME_ALLOW.forEach(n=>nameSel.append(ce('option',{value:n,textContent:n})));
+  const deptSel=ce('select',{id:'dept',className:'select'});
+  deptSel.append(ce('option',{value:'',textContent:'부서 선택'}));
+  DEPT_ALLOW.forEach(d=>deptSel.append(ce('option',{value:d,textContent:d})));
+  row.append(fieldLabelled('성명',nameSel,true), fieldLabelled('부서',deptSel,true));
+  card.append(row);
 
-const nameSel = ce('select',{id:'userName', className:'select'});
-nameSel.append(ce('option',{value:'', textContent:'성명 선택'}));
-NAME_ALLOW.forEach(n=> nameSel.append(ce('option',{value:n, textContent:n})));
-
-const deptSel = ce('select',{id:'dept', className:'select'});
-deptSel.append(ce('option',{value:'', textContent:'부서 선택'}));
-DEPT_ALLOW.forEach(d=> deptSel.append(ce('option',{value:d, textContent:d})));
-
-row.append(
-  fieldLabelled('성명', nameSel, /*required=*/true),
-  fieldLabelled('부서', deptSel, /*required=*/true)
-);
-card.append(row);
-
-  // 운행 후/비고 (같은 줄)
+  // 운행 후 / 비고
   const row2=ce('div',{className:'row'});
   const odoI=ce('input',{id:'odo',type:'number',inputMode:'numeric',placeholder:'예) 21840'});
-  const memoI=ce('textarea',{id:'memo',placeholder:'시설점검 등'}); // 1줄 고정
-  row2.append(field('운행 후 km(숫자)',odoI), field('비고(선택)',memoI));
+  const memoI=ce('textarea',{id:'memo',placeholder:'시설점검 등'});
+  row2.append(fieldLabelled('운행 후 km(숫자)',odoI,true), field('비고(선택)',memoI));
   card.append(row2);
 
-  // 운행 전 km 배지 + 우측 미세 안내
+  // 운행전 배지 + 미세 안내
   const meta=ce('div',{style:'display:flex;align-items:center;gap:8px'});
   const prevBadge=ce('span',{className:'prevkm',textContent:'운행 전: 확인중…'});
   const micro=ce('div',{className:'micro',textContent:'내 정보는 이 기기에만 저장됩니다.'});
-  meta.append(prevBadge); meta.append(micro);
+  meta.append(prevBadge,micro);
   card.append(meta);
 
   page.append(card);
@@ -439,126 +311,55 @@ card.append(row);
   sticky.append(submit);
   page.append(sticky);
 
-// 저장값 로드
-const keyN='drive_userName', keyD='drive_dept';
-const savedN = localStorage.getItem(keyN), savedD = localStorage.getItem(keyD);
-if (savedN && NAME_ALLOW.includes(savedN)) nameSel.value = savedN;
-if (savedD && DEPT_ALLOW.includes(savedD)) deptSel.value = savedD;
+  // 저장값 복원
+  const keyN='drive_userName', keyD='drive_dept';
+  const savedN=localStorage.getItem(keyN), savedD=localStorage.getItem(keyD);
+  if(savedN && NAME_ALLOW.includes(savedN)) nameSel.value=savedN;
+  if(savedD && DEPT_ALLOW.includes(savedD)) deptSel.value=savedD;
 
-// 초기화
-resetBtn.onclick = () => {
-  localStorage.removeItem(keyN); localStorage.removeItem(keyD);
-  nameSel.value=''; deptSel.value='';
-  toast('저장된 이름/부서를 삭제했습니다.');
-};
+  resetBtn.onclick=()=>{ localStorage.removeItem(keyN); localStorage.removeItem(keyD); nameSel.value=''; deptSel.value=''; toast('저장된 이름/부서를 삭제했습니다.'); };
 
-// 모바일에서 km 입력 시 자동 스크롤
-odoI.addEventListener('focus',()=>{
-  setTimeout(()=>odoI.scrollIntoView({behavior:'smooth',block:'center'}),150);
-});
+  odoI.addEventListener('focus',()=>setTimeout(()=>odoI.scrollIntoView({behavior:'smooth',block:'center'}),150));
 
-// 제출
-submit.onclick = async () => {
-  const userName = nameSel.value;
-  const dept     = deptSel.value;
-  const odo      = odoI.value.trim();
-  const memo     = memoI.value.trim();
+  // 제출
+  submit.onclick = async () => {
+    const userName=nameSel.value;
+    const dept=deptSel.value;
+    const odo=odoI.value.trim();
+    const memo=memoI.value.trim();
 
-  if(!userName){ toast('성명을 선택해주세요', false); nameSel.focus(); return; }
-  if(!dept){     toast('부서를 선택해주세요', false);  deptSel.focus(); return; }
-  if(!odo || isNaN(+odo)){ toast('운행 후 km(숫자)를 입력해주세요', false); odoI.focus(); return; }
+    if(!userName){ toast('성명을 선택해주세요',false); nameSel.focus(); return; }
+    if(!dept){ toast('부서를 선택해주세요',false); deptSel.focus(); return; }
+    if(!odo || isNaN(+odo)){ toast('운행 후 km(숫자)를 입력해주세요',false); odoI.focus(); return; }
+    if(!NAME_ALLOW.includes(userName)){ toast('성명은 목록에서 선택해주세요.',false); nameSel.focus(); return; }
+    if(!DEPT_ALLOW.includes(dept)){ toast('부서는 목록에서 선택해주세요.',false); deptSel.focus(); return; }
 
-  localStorage.setItem(keyN, userName);
-  localStorage.setItem(keyD, dept);
+    localStorage.setItem(keyN,userName);
+    localStorage.setItem(keyD,dept);
 
-  // 전송 직전: 해당 차량의 기존 건수 카운트
-  let beforeCount = 0;
-  await new Promise(res => fetchCsv(rows => {
-    beforeCount = rows.filter((r,i)=>i>0 && String(r[1]||'').toUpperCase()===vehicle).length;
-    res();
-  }, true));
+    // 전송 전 기존 건수
+    let beforeCount=0;
+    await new Promise(res=>fetchCsv(rows=>{
+      beforeCount=rows.filter((r,i)=>i>0 && String(r[1]||'').toUpperCase()===vehicle).length; res();
+    },true));
 
-  // 전송 시작: 로딩 띄우고 입력 잠금
-  setLoading(true, '기록을 저장하는 중입니다…');
+    setLoading(true,'기록을 저장하는 중입니다…');
 
-  try{
-    // Webhook 전송
-    const resp = await fetch(WEBHOOK_URL,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ vehicle, userName, dept, odo, memo })
-    });
-    if(!resp.ok) throw new Error('네트워크 오류');
+    try{
+      const resp=await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({vehicle,userName,dept,odo,memo})});
+      if(!resp.ok) throw new Error('네트워크 오류');
 
-    // 시트 반영될 때까지 폴링 (최대 15초)
-    const ok = await waitUntilUpdated(vehicle, beforeCount, 15000);
+      const ok=await waitUntilUpdated(vehicle,beforeCount,15000);
 
-    // 입력창 초기화 & 즉시 반영 시도
-    odoI.value=''; memoI.value=''; odoI.focus();
-    refreshPrev(true);
-    loadHistory(vehicle, true);
+      odoI.value=''; memoI.value=''; odoI.focus();
+      refreshPrev(true);
+      loadHistory(vehicle,true);
+      setTimeout(()=>refreshAfterChange(vehicle),1200);
 
-    // 자동 새로고침(추가 반영)
-    setTimeout(() => refreshAfterChange(vehicle), 1200);
-
-    toast(ok ? '전송 완료! ✅' : '전송은 완료, 반영 대기 중입니다.', ok);
-  }catch(e){
-    toast('전송 실패: ' + e.message, false);
-  }finally{
-    setLoading(false);
-  }
-};
-
-
-  // 필수 검증
-if (!NAME_ALLOW.includes(userName)) { toast('성명은 목록에서 선택해주세요.', false);  nameSel.focus(); return; }
-if (!DEPT_ALLOW.includes(dept))     { toast('부서는 목록에서 선택해주세요.', false); deptSel.focus(); return; }
-if (!odo || isNaN(+odo))            { toast('운행 후 km(숫자)를 입력해주세요', false);  odoI.focus();    return; }
-
-
-  // 로컬 저장
-  localStorage.setItem(keyN, userName);
-  localStorage.setItem(keyD, dept);
-
-  // 전송 직전: 해당 차량의 기존 건수 카운트
-  let beforeCount = 0;
-  await new Promise(res => fetchCsv(rows => {
-    beforeCount = rows.filter((r,i)=>i>0 && String(r[1]||'').toUpperCase()===vehicle).length;
-    res();
-  }, true));
-
-  // 전송 시작: 로딩 띄우고 입력 잠금
-  setLoading(true, '기록을 저장하는 중입니다…');
-
-  try{
-    // Webhook 전송
-    const resp = await fetch(WEBHOOK_URL,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ vehicle, userName, dept, odo, memo })
-    });
-    if(!resp.ok) throw new Error('네트워크 오류');
-
-    // 시트 반영될 때까지 폴링 (최대 15초)
-    const ok = await waitUntilUpdated(vehicle, beforeCount, 15000);
-
-    // 입력창 초기화 & 즉시 반영 시도
-    odoI.value=''; memoI.value=''; odoI.focus();
-    refreshPrev(true);
-    loadHistory(vehicle, true);
-
-    // 자동 새로고침(추가 반영)
-    setTimeout(() => refreshAfterChange(vehicle), 1200);
-
-    toast(ok ? '전송 완료! ✅' : '전송은 완료, 반영 대기 중입니다.', ok);
-  }catch(e){
-    toast('전송 실패: ' + e.message, false);
-  }finally{
-    setLoading(false);
-  }
-};
-
-
+      toast(ok?'전송 완료! ✅':'전송은 완료, 반영 대기 중입니다.',ok);
+    }catch(e){ toast('전송 실패: '+e.message,false); }
+    finally{ setLoading(false); }
+  };
 
   // 운행 전 km 표시
   function refreshPrev(force){
@@ -569,20 +370,22 @@ if (!odo || isNaN(+odo))            { toast('운행 후 km(숫자)를 입력해�
         if(String(r[1]||'').toUpperCase()===vehicle){ last=r; break; }
       }
       if(last){
-        const pre=Number(last[5]||'');
-        prevBadge.textContent = Number.isFinite(pre)? `운행 전: ${pre} km` : '운행 전: —';
-      }else prevBadge.textContent='운행 전: (첫 기록)';
+        const post=Number(last[5]||''); const day=Number(last[6]||'');
+        const pre=(Number.isFinite(post)&&Number.isFinite(day))?(post-day):NaN;
+        prevBadge.textContent = Number.isFinite(pre)? `운행 전: ${pre} km` : (Number.isFinite(post)? `운행 전: —` : '운행 전: —');
+      }else{
+        prevBadge.textContent='운행 전: (첫 기록)';
+      }
     },force);
   }
   refreshPrev();
 
-  /* 차량 최근 기록 카드 */
+  // 최근 기록 카드
   const histCard=ce('div',{className:'history'});
   histCard.append(ce('div',{className:'section-title',textContent:'최근 기록'}));
   histCard.append(ce('div',{id:'histBody'}));
   page.insertBefore(histCard,sticky);
   loadHistory(vehicle);
-
 }
 
 /* ===== 운행일지 탭 ===== */
@@ -592,13 +395,12 @@ function renderSheetTab(){
   page.append(ce('p',{className:'caption',textContent:'차량을 선택해 “운행일지 양식”을 읽기 모드로 확인하세요.'}));
   const grid=ce('div',{className:'grid'});
   VEHICLES.forEach(v=>{
-    const a=ce('a',{className:'mini',href:'#',onclick:e=>{e.preventDefault();openSheetView(v.id,v.name);} });
+    const a=ce('a',{className:'mini',href:'#',onclick:e=>{e.preventDefault();openSheetView(v.id,v.name);}});
     a.textContent=`${v.name} (${v.id})`;
     grid.append(a);
   });
   page.append(grid,ce('div',{id:'sheetView',className:'card'}));
 }
-
 function openSheetView(vehicle,vname){
   const host=el('#sheetView'); host.innerHTML='';
   host.append(section(`${vname} · ${vehicle}`));
@@ -618,7 +420,7 @@ function openSheetView(vehicle,vname){
   });
 }
 
-/* ===== 최근기록 탭 (전 차량, 10개/페이지) ===== */
+/* ===== 최근기록 탭 ===== */
 function renderRecentTab(){
   const page=el('#page'); page.innerHTML='';
   page.append(section('최근기록'));
@@ -632,24 +434,22 @@ function renderRecentTab(){
     let cur=1;
     function draw(){
       const slice=items.slice((cur-1)*per,(cur-1)*per+per);
-   el('#recentList').innerHTML = slice.map(r=>{
-  const date = fmtDateSmart(r[0]||'');
-  const vid  = r[1]||'';
-  const vname= (VEHICLES.find(v=>v.id===vid)?.name) || vid;
-  const name = r[4]||'', dept=r[8]||'';
-  const post = Number(r[5]||0), day=Number(r[6]||0), memo=r[7]||'';
-  const pre  = (Number.isFinite(post) && Number.isFinite(day)) ? (post - day) : null;
-
-  return `
-    <div class="hitem">
-      <div class="kpill">${Number.isFinite(day) && day>0 ? `${day}km` : '—'}</div>
-      <div class="hline" style="flex:1">
-        <div class="hmeta">${vname} · ${date}</div>
-        <div><strong style="font-weight:900">${name}</strong> · ${dept} · 주행후 ${post}km${pre!=null ? ` · 운행전 ${pre}km` : ''}${memo ? ` · ${memo}` : ''}</div>
-      </div>
-    </div>`;
-}).join('') || '<div class="hmeta">기록이 없습니다.</div>';
-
+      el('#recentList').innerHTML = slice.map(r=>{
+        const date=fmtDateSmart(r[0]||'');
+        const vid=r[1]||'';
+        const vname=(VEHICLES.find(v=>v.id===vid)?.name)||vid;
+        const name=r[4]||'', dept=r[8]||'';
+        const post=Number(r[5]||0), day=Number(r[6]||0), memo=r[7]||'';
+        const pre=(Number.isFinite(post)&&Number.isFinite(day))?(post-day):null;
+        return `
+          <div class="hitem">
+            <div class="kpill">${Number.isFinite(day)&&day>0?`${day}km`:'—'}</div>
+            <div class="hline" style="flex:1">
+              <div class="hmeta">${vname} · ${date}</div>
+              <div><strong style="font-weight:900">${name}</strong> · ${dept} · 주행후 ${post}km${pre!=null?` · 운행전 ${pre}km`:''}${memo?` · ${memo}`:''}</div>
+            </div>
+          </div>`;
+      }).join('') || '<div class="hmeta">기록이 없습니다.</div>';
       pager.innerHTML='';
       for(let i=1;i<=maxPages;i++){
         const b=ce('button',{textContent:String(i)});
@@ -682,38 +482,33 @@ function renderMoreTab(){
   page.append(grid);
 }
 
-/* ===== 차량별 히스토리(상세) + 삭제 버튼 ===== */
-function loadHistory(vehicle, force){
-  var body = el('#histBody'); if(!body) return;
-  fetchCsv(function(rows){
-    const out = rows
-      .filter((r,i)=> i>0 && String(r[1]||'').trim().toUpperCase()===vehicle)
+/* ===== 차량별 히스토리 + 삭제 ===== */
+function loadHistory(vehicle,force){
+  const body=el('#histBody'); if(!body) return;
+  fetchCsv(rows=>{
+    const out=rows
+      .filter((r,i)=>i>0 && String(r[1]||'').trim().toUpperCase()===vehicle)
       .slice(-30).reverse()
       .map(r=>{
-        const date = fmtDateSmart(r[0]||'');   // ← 날짜 포맷 적용
-        const name = r[4]||'', dept=r[8]||'', odo=r[5]||'', day=r[6]||'', memo=r[7]||'';
-        const tsRaw = r[0] || '';
+        const date=fmtDateSmart(r[0]||'');
+        const name=r[4]||'', dept=r[8]||'', odo=r[5]||'', day=r[6]||'', memo=r[7]||'';
+        const tsRaw=r[0]||'';
         return `
           <div class="item">
-            <span class="k">${day? (day+'km') : '—'}</span>
+            <span class="k">${day?(day+'km'):'—'}</span>
             <div style="flex:1;">
               <div><strong>${name}</strong> · ${dept} · <span class="meta">${date}</span></div>
-              <div class="meta">주행후 ${odo}km${memo? ' · '+memo:''}</div>
+              <div class="meta">주행후 ${odo}km${memo?' · '+memo:''}</div>
             </div>
-${DELETE_URL ? `
-  <button class="btn small"
-    data-action="delete"
-    data-ts="${String(tsRaw).replace(/"/g,'&quot;')}"
-    data-vehicle="${vehicle}">
-    삭제
-  </button>` : ''}
-
+            ${DELETE_URL?`
+            <button class="btn small" data-action="delete"
+              data-ts="${String(tsRaw).replace(/"/g,'&quot;')}"
+              data-vehicle="${vehicle}">삭제</button>`:''}
           </div>`;
       }).join('') || '<div class="item meta">기록이 없습니다.</div>';
-    body.innerHTML = out;
-  }, force);
+    body.innerHTML=out;
+  },force);
 }
-
 
 /* ===== CSV 공통 ===== */
 function fetchCsv(done,force){
@@ -735,24 +530,8 @@ function parseCSV(text){
 }
 
 /* ===== UI 헬퍼 ===== */
-function field(label,input){
-  const w=ce('div',{style:'flex:1'});
-  w.append(ce('label',{textContent:label}),input);
-  return w;
-}
-
-function fieldLabelled(labelText, inputEl, required=false){
-  const wrap = ce('div',{style:'flex:1'});
-  const lab = ce('label',{textContent:labelText, className: required ? 'req' : ''});
-  wrap.append(lab, inputEl);
-  return wrap;
-}
-
-function addDatalist(input, items){
-  const id='dl_'+Math.random().toString(36).slice(2);
-  const dl=ce('datalist',{id}); items.forEach(v=>dl.append(ce('option',{value:v}))); document.body.append(dl);
-  input.setAttribute('list',id);
-}
+function field(label,input){ const w=ce('div',{style:'flex:1'}); w.append(ce('label',{textContent:label}),input); return w; }
+function fieldLabelled(labelText,inputEl,required=false){ const wrap=ce('div',{style:'flex:1'}); const lab=ce('label',{textContent:labelText,className:required?'req':''}); wrap.append(lab,inputEl); return wrap; }
 
 /* ===== 더보기: 메일 담당자 표시 ===== */
 function showContacts(){
@@ -763,81 +542,44 @@ function showContacts(){
   }).catch(()=>toast('불러오기 실패',false));
 }
 
-  // ... 기존 코드 위아래 상관없음 (전역 범위에) 추가
-  function refreshAfterChange(vehicle){
-    // 차량 상세 화면이면 그 차량 히스토리만 새로고침
-    if (vehicle) { loadHistory(vehicle, true); }
+/* 공통 리프레시 */
+function refreshAfterChange(vehicle){
+  if(vehicle) loadHistory(vehicle,true);
+  if(location.hash==='#recent') renderRecentTab();
+}
 
-    // 최근기록 탭이 열려 있으면 다시 그리기
-    if (location.hash === '#recent') { renderRecentTab(); }
-  }
-
+/* 날짜 파서(시리얼/국문/ISO 모두) */
 function fmtDateSmart(s){
-  if (s instanceof Date && !isNaN(s)) return ymdhm(s);
-  if (/^\d+(\.\d+)?$/.test(String(s))) {
-    const d = new Date(Math.round((Number(s) - 25569) * 86400 * 1000));
-    if (!isNaN(d)) return ymdhm(d);
+  if(s instanceof Date && !isNaN(s)) return ymdhm(s);
+  if(/^\d+(\.\d+)?$/.test(String(s))){
+    const d=new Date(Math.round((Number(s)-25569)*86400*1000));
+    if(!isNaN(d)) return ymdhm(d);
   }
-  const kr = String(s).trim();
-  const m = kr.match(/^(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일\s*(오전|오후)\s*(\d{1,2}):(\d{2})/);
-  if (m){
-    let [_, y, mo, d, ap, h, mi] = m;
-    y=+y; mo=+mo; d=+d; h=+h; mi=+mi;
-    if (ap==='오후' && h<12) h+=12;
-    if (ap==='오전' && h===12) h=0;
-    const dt = new Date(y, mo-1, d, h, mi);
+  const kr=String(s).trim();
+  const m=kr.match(/^(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일\s*(오전|오후)\s*(\d{1,2}):(\d{2})/);
+  if(m){
+    let[,y,mo,d,ap,h,mi]=m; y=+y; mo=+mo; d=+d; h=+h; mi=+mi;
+    if(ap==='오후'&&h<12) h+=12;
+    if(ap==='오전'&&h===12) h=0;
+    const dt=new Date(y,mo-1,d,h,mi);
     if(!isNaN(dt)) return ymdhm(dt);
   }
-  const d2 = new Date(s);
-  if (!isNaN(d2)) return ymdhm(d2);
+  const d2=new Date(s); if(!isNaN(d2)) return ymdhm(d2);
   return String(s);
 }
-function ymdhm(d){
-  const yoil = ['일','월','화','수','목','금','토'][d.getDay()];
-  const pad = n => String(n).padStart(2,'0');
-  return `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())}(${yoil}) ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
+function ymdhm(d){ const yoil=['일','월','화','수','목','금','토'][d.getDay()]; const pad=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())}(${yoil}) ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
 
-
-// 전역 클릭 리스너 (삭제 버튼용)
+/* 삭제 버튼 위임 */
 document.addEventListener('click', (e) => {
   const b = e.target.closest('button[data-action="delete"]');
-  if (!b) return; // 클릭한 게 삭제버튼이 아니면 무시
+  if (!b) return;
   const ts = b.getAttribute('data-ts');
   const vehicle = b.getAttribute('data-vehicle');
-  deleteAndRefresh(ts, vehicle, b); // 기존 함수 실행
+  deleteAndRefresh(ts, vehicle, b);
 });
 
-
-  // 초기 진입 시 홈으로 (#/) 강제 세팅
-if (!location.hash) location.hash = '#/';
-
-// 전역 에러 핸들러: 에러를 토스트로 보여줌
-window.addEventListener('error', (e) => {
-  const msg = e?.error?.message || e?.message || '스크립트 오류';
-  toast('오류: ' + msg, false);
-  console.error(e?.error || e);
-});
-
+/* 전역 에러 토스트 */
+window.addEventListener('error',(e)=>{ const msg=e?.error?.message||e?.message||'스크립트 오류'; toast('오류: '+msg,false); console.error(e?.error||e); });
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
