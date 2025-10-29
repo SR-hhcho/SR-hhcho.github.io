@@ -300,13 +300,12 @@ function renderHome(){
 }
 
 /* ===== 차량 페이지 ===== */
-/* ===== 차량 페이지 ===== */
 function renderVehicle(vehicle){
   const v = VEHICLES.find(x=>x.id===vehicle) || {id:vehicle,name:''};
-  const page = el('#page'); 
-  page.innerHTML='';
+  const page = el('#page');
+  page.innerHTML = '';
 
-  // --- 헤더(왼쪽 배지 2줄 + 오른쪽 설명 2줄) ---
+  /* 헤더(왼쪽 차량번호/ID 2줄 + 오른쪽 설명 2줄) */
   const head = ce('div',{className:'card head-card'});
   const vchip = ce('div',{className:'vchip2'});
   vchip.innerHTML = `
@@ -314,50 +313,54 @@ function renderVehicle(vehicle){
     <div class="vid">${vehicle}</div>
   `;
   const desc = ce('div',{className:'head-desc',
-    textContent:'운행 후 km(숫자)와 운행목적(비고)을 입력해주세요. 이름/부서는 최초 1회만 저장됩니다.'
-  });
+    textContent:'운행 후 km(숫자)와 운행목적(비고)을 입력해주세요. 이름/부서는 최초 1회만 저장됩니다.'});
   head.append(vchip, desc);
   page.append(head);
 
-  // --- 입력 카드 ---
+  /* 입력 카드 */
   const card = ce('div',{className:'card'});
 
-  // 성명/부서(Select)
-  const row=ce('div',{className:'row'});
-  const nameSel=ce('select',{id:'userName',className:'select'});
+  // 성명/부서 (Select)
+  const row = ce('div',{className:'row'});
+  const nameSel = ce('select',{id:'userName',className:'select'});
   nameSel.append(ce('option',{value:'',textContent:'성명 선택'}));
   NAME_ALLOW.forEach(n=>nameSel.append(ce('option',{value:n,textContent:n})));
-  const deptSel=ce('select',{id:'dept',className:'select'});
+
+  const deptSel = ce('select',{id:'dept',className:'select'});
   deptSel.append(ce('option',{value:'',textContent:'부서 선택'}));
-  DEPT_ALLOW.forEach(d=>deptSel.append(ce('option',{value:d,textContent:d)}));
-  row.append(fieldLabelled('성명',nameSel,true), fieldLabelled('부서',deptSel,true));
+  DEPT_ALLOW.forEach(d=>deptSel.append(ce('option',{value:d,textContent:d})));
+
+  row.append(
+    fieldLabelled('성명', nameSel, /*required=*/true),
+    fieldLabelled('부서', deptSel, /*required=*/true)
+  );
   card.append(row);
 
   // 운행 후 / 비고
-  const row2=ce('div',{className:'row'});
-  const odoI=ce('input',{id:'odo',type:'number',inputMode:'numeric',placeholder:'예) 21840'});
-  const memoI=ce('textarea',{id:'memo',placeholder:'시설점검 등'});
-  row2.append(fieldLabelled('운행 후 km(숫자)',odoI,true), field('비고(선택)',memoI));
+  const row2 = ce('div',{className:'row'});
+  const odoI  = ce('input',{id:'odo',type:'number',inputMode:'numeric',placeholder:'예) 21840'});
+  const memoI = ce('textarea',{id:'memo',placeholder:'시설점검 등'});
+  row2.append(fieldLabelled('운행 후 km(숫자)', odoI, true), field('비고(선택)', memoI));
   card.append(row2);
 
   // 운행전 배지 + 미세 안내
-  const meta=ce('div',{style:'display:flex;align-items:center;gap:8px'});
-  const prevBadge=ce('span',{id:'prevkm-badge',className:'prevkm',textContent:'운행 전: 확인중…'});
-  const micro=ce('div',{className:'micro',textContent:'내 정보는 이 기기에만 저장됩니다.'});
-  meta.append(prevBadge,micro);
+  const meta = ce('div',{style:'display:flex;align-items:center;gap:8px'});
+  const prevBadge = ce('span',{className:'prevkm',textContent:'운행 전: 확인중…'});
+  const micro = ce('div',{className:'micro',textContent:'내 정보는 이 기기에만 저장됩니다.'});
+  meta.append(prevBadge, micro);
   card.append(meta);
 
   page.append(card);
 
   // 액션
-  const actions=ce('div',{className:'actions'});
-  const backBtn=ce('a',{className:'btn ghost',href:'#/'}); backBtn.textContent='← 홈으로';
-  const resetBtn=ce('button',{className:'btn',type:'button'}); resetBtn.textContent='내 정보 초기화';
-  actions.append(backBtn,resetBtn);
+  const actions = ce('div',{className:'actions'});
+  const backBtn = ce('a',{className:'btn ghost',href:'#/'}); backBtn.textContent='← 홈으로';
+  const resetBtn= ce('button',{className:'btn',type:'button'}); resetBtn.textContent='내 정보 초기화';
+  actions.append(backBtn, resetBtn);
   page.append(actions);
 
-  const sticky=ce('div',{className:'sticky'});
-  const submit=ce('button',{className:'primary',textContent:'제출하기',type:'button'});
+  const sticky = ce('div',{className:'sticky'});
+  const submit = ce('button',{className:'primary',textContent:'제출하기',type:'button'});
   sticky.append(submit);
   page.append(sticky);
 
@@ -367,29 +370,28 @@ function renderVehicle(vehicle){
   if(savedN && NAME_ALLOW.includes(savedN)) nameSel.value=savedN;
   if(savedD && DEPT_ALLOW.includes(savedD)) deptSel.value=savedD;
 
-  // 초기화
+  // 초기화 버튼
   resetBtn.onclick=()=>{
-    localStorage.removeItem(keyN);
-    localStorage.removeItem(keyD);
+    localStorage.removeItem(keyN); localStorage.removeItem(keyD);
     nameSel.value=''; deptSel.value='';
     toast('저장된 이름/부서를 삭제했습니다.');
   };
 
-  // 모바일 편의
+  // 모바일에서 km 포커스 시 스크롤
   odoI.addEventListener('focus',()=>setTimeout(()=>odoI.scrollIntoView({behavior:'smooth',block:'center'}),150));
 
   // 제출
   submit.onclick = async () => {
-    const userName=nameSel.value;
-    const dept=deptSel.value;
-    const odo=odoI.value.trim();
-    const memo=memoI.value.trim();
+    const userName = nameSel.value;
+    const dept     = deptSel.value;
+    const odo      = odoI.value.trim();
+    const memo     = memoI.value.trim();
 
-    if(!userName){ toast('성명을 선택해주세요',false); nameSel.focus(); return; }
-    if(!dept){ toast('부서를 선택해주세요',false); deptSel.focus(); return; }
-    if(!odo || isNaN(+odo)){ toast('운행 후 km(숫자)를 입력해주세요',false); odoI.focus(); return; }
-    if(!NAME_ALLOW.includes(userName)){ toast('성명은 목록에서 선택해주세요.',false); nameSel.focus(); return; }
-    if(!DEPT_ALLOW.includes(dept)){ toast('부서는 목록에서 선택해주세요.',false); deptSel.focus(); return; }
+    if(!userName){ toast('성명을 선택해주세요', false); nameSel.focus(); return; }
+    if(!dept){     toast('부서를 선택해주세요', false);  deptSel.focus(); return; }
+    if(!odo || isNaN(+odo)){ toast('운행 후 km(숫자)를 입력해주세요', false); odoI.focus(); return; }
+    if(!NAME_ALLOW.includes(userName)){ toast('성명은 목록에서 선택해주세요.', false); nameSel.focus(); return; }
+    if(!DEPT_ALLOW.includes(dept)){     toast('부서는 목록에서 선택해주세요.', false);  deptSel.focus(); return; }
 
     localStorage.setItem(keyN,userName);
     localStorage.setItem(keyD,dept);
@@ -397,35 +399,37 @@ function renderVehicle(vehicle){
     // 전송 전 기존 건수
     let beforeCount=0;
     await new Promise(res=>fetchCsv(rows=>{
-      beforeCount=rows.filter((r,i)=>i>0 && String(r[1]||'').toUpperCase()===vehicle).length; 
+      beforeCount = rows.filter((r,i)=>i>0 && String(r[1]||'').toUpperCase()===vehicle).length;
       res();
-    },true));
+    }, true));
 
     setLoading(true,'기록을 저장하는 중입니다…');
 
     try{
-      const resp=await fetch(WEBHOOK_URL,{
+      const resp = await fetch(WEBHOOK_URL,{
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({vehicle,userName,dept,odo,memo})
+        body: JSON.stringify({vehicle,userName,dept,odo,memo})
       });
       if(!resp.ok) throw new Error('네트워크 오류');
 
-      const ok=await waitUntilUpdated(vehicle,beforeCount,15000);
+      const ok = await waitUntilUpdated(vehicle,beforeCount,15000);
 
+      // 입력창 초기화 & 반영 시도
       odoI.value=''; memoI.value=''; odoI.focus();
       refreshPrev(true);
       loadHistory(vehicle,true);
       setTimeout(()=>refreshAfterChange(vehicle),1200);
-      toast(ok?'전송 완료! ✅':'전송은 완료, 반영 대기 중입니다.',ok);
+
+      toast(ok ? '전송 완료! ✅' : '전송은 완료, 반영 대기 중입니다.', ok);
     }catch(e){
-      toast('전송 실패: '+e.message,false);
+      toast('전송 실패: '+e.message, false);
     }finally{
       setLoading(false);
     }
   };
 
-  // 운행 전 km 표시
+  // 운행 전 km 표시(=주행전 = 주행후-일운행)
   function refreshPrev(force){
     fetchCsv(rows=>{
       let last=null;
@@ -434,22 +438,26 @@ function renderVehicle(vehicle){
         if(String(r[1]||'').toUpperCase()===vehicle){ last=r; break; }
       }
       if(last){
-        const post=Number(last[5]||''); const day=Number(last[6]||'');
+        const post=Number(last[5]||'');
+        const day =Number(last[6]||'');
         const pre=(Number.isFinite(post)&&Number.isFinite(day))?(post-day):NaN;
         prevBadge.textContent = Number.isFinite(pre)? `운행 전: ${pre} km` : '운행 전: —';
       }else{
         prevBadge.textContent='운행 전: (첫 기록)';
       }
-    },force);
+    }, force);
   }
   refreshPrev();
 
-  // 최근 기록 카드
+  // 차량별 최근 기록 카드
   const histCard=ce('div',{className:'history'});
   histCard.append(ce('div',{className:'section-title',textContent:'최근 기록'}));
   histCard.append(ce('div',{id:'histBody'}));
-  page.insertBefore(histCard,sticky);
+  page.insertBefore(histCard, sticky);
   loadHistory(vehicle);
+
+  // 이 화면에 들어오면 폴링 시작
+  startPolling('VEH:'+vehicle);
 }
 
 /* ===== 운행일지 탭 ===== */
@@ -666,10 +674,86 @@ window.addEventListener('error',(e)=>{ const msg=e?.error?.message||e?.message||
   function refreshVisible(){ /* ... */ }
   async function startAutoRefresh(){ /* ... */ }
   startAutoRefresh();
+
+// === 10초 폴링로직 (최근/차량 화면 자동 새로고침) ===
+let _pollTimer = null;
+let _lastStamp = '';
+
+function calcStamp(rows, vehicle){  // 화면별로 최신 상태를 간단히 해시화
+  if (!rows || rows.length<=1) return '';
+  if (vehicle){
+    for(let i=rows.length-1;i>=1;i--){
+      const r=rows[i];
+      if ((r[1]||'').toUpperCase()===vehicle) {
+        return String(r[0]||'') + '|' + String(r[5]||'') + '|' + String(r[6]||'');
+      }
+    }
+    return '';
+  }else{
+    // 최근기록 탭: 맨 마지막 행들의 타임스탬프/주요 필드
+    const r = rows[rows.length-1] || [];
+    return String(r[0]||'') + '|' + String(r[1]||'') + '|' + String(r[5]||'') + '|' + String(r[6]||'');
+  }
+}
+
+function startPolling(key){
+  stopPolling();
+  const isVehicle = key && key.startsWith('VEH:');
+  const vehicle = isVehicle ? key.slice(4) : null;
+
+  // 최초 스탬프 채우기
+  fetchCsv(rows=>{
+    _lastStamp = calcStamp(rows, vehicle);
+  }, true);
+
+  _pollTimer = setInterval(()=>{
+    fetchCsv(rows=>{
+      const now = calcStamp(rows, vehicle);
+      if (now && now !== _lastStamp){
+        _lastStamp = now;
+        if (isVehicle){
+          // 차량 화면이면 해당 화면만 부분 새로고침
+          refreshAfterChange(vehicle);
+        }else{
+          // 최근기록 탭이면 다시 그리기
+          if (location.hash === '#recent') renderRecentTab();
+        }
+      }
+    }, true);
+  }, 10000); // 10초
+}
+
+function stopPolling(){
+  if (_pollTimer){ clearInterval(_pollTimer); _pollTimer=null; }
+}
+
+// 라우트 변경될 때 폴링 키 교체
+const _origRoute = route;
+window.removeEventListener('hashchange', route);
+window.addEventListener('hashchange', ()=>{
+  _origRoute();
+  const seg = (location.hash||'#/').slice(2).split('/').filter(Boolean);
+  const first = seg[0]||'';
+  if (!first){ stopPolling(); return; }          // 홈: 폴링 off
+  if (first==='recent'){ startPolling('RECENT'); return; }
+  if (first==='sheet' || first==='more'){ stopPolling(); return; }
+  // 차량 상세
+  startPolling('VEH:'+first.toUpperCase());
+});
+
+// 초기 진입 시에도 폴링 상태 맞추기
+(function initPollOnLoad(){
+  const seg = (location.hash||'#/').slice(2).split('/').filter(Boolean);
+  const first = seg[0]||'';
+  if (first==='recent'){ startPolling('RECENT'); }
+  else if (first && !['sheet','more'].includes(first)){ startPolling('VEH:'+first.toUpperCase()); }
+})();
+
   
 </script>
 </body>
 </html>
+
 
 
 
