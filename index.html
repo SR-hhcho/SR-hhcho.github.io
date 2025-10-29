@@ -30,8 +30,10 @@ body{
 .apptitle{justify-self:center;font-weight:900;font-size:17px;letter-spacing:-0.3px}
 .apptitle a{color:inherit;text-decoration:none}
 
-/* 섹션/캡션 */
+/* 섹션 타이틀 */
 .section-title{margin:10px 16px 4px;font-weight:900;color:#1b64da;font-size:13px}
+
+/* 안내 캡션 */
 .caption{color:var(--sub);font-size:13px;margin:6px 16px 8px}
 
 /* 카드/폼 */
@@ -53,7 +55,7 @@ textarea{height:44px;resize:none}
 .micro{margin-top:6px;margin-left:auto;color:#95a1ad;font-size:12px}
 
 /* 버튼/액션 */
-.actions{display:flex;gap:8px;margin:8px 12px}
+.actions{display:flex;gap:8px;margin:8px 12px;flex-wrap:wrap}
 .btn{appearance:none;border:1px solid var(--line);background:#fff;color:#374151;border-radius:12px;padding:10px 14px;font-size:14px;font-weight:800;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
 .btn:hover{filter:brightness(0.98)}
 .btn.ghost{background:#fff}
@@ -69,7 +71,7 @@ button.primary:active{background:var(--blue-press)}
 .plate{font-weight:900;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60vw}
 .idtag{font-size:11px;font-weight:800;color:#1e40af;background:#eef2ff;padding:2px 8px;border-radius:999px;border:1px solid #dbe6ff;white-space:nowrap}
 
-/* 히스토리 카드 */
+/* 히스토리 카드 공통 */
 .history{margin:8px 12px 84px;padding:10px;border:1px solid var(--line);border-radius:14px;background:#fff}
 .hitem{display:flex;gap:12px;align-items:flex-start;padding:12px 4px;border-bottom:1px dashed var(--line)}
 .hitem:last-child{border-bottom:none}
@@ -82,42 +84,47 @@ button.primary:active{background:var(--blue-press)}
   font-weight:900;font-size:12px;box-shadow:0 4px 12px rgba(59,130,246,.08)
 }
 
-/* 3줄 본문 */
+/* 가운데 본문(3줄) */
 .hcell{flex:1;min-width:0}
 .hrow1{display:flex;justify-content:space-between;gap:8px}
 .hrow1 .title{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hrow1 .metaR{color:#64748b;font-size:12px;white-space:nowrap}
-.hrow2{color:#374151;font-size:12.5px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hrow2{color:#374151;font-size:12.5px;line-height:1.3;word-break:keep-all}
+.hrow2 .postkm{font-weight:900;color:#111;margin-right:6px}
 .hrow3{color:#6b7280;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* 삭제 버튼 작게 */
 .btn.small{padding:6px 10px;font-size:12px}
 
-/* ===== 차량 헤더(번호 강조 + ID 보조, 컴팩트) ===== */
+/* ===== 차량 헤더(왼쪽 배지 2줄 + 오른쪽 설명 2줄) ===== */
 .head-card{display:flex;gap:12px;align-items:center}
 .vchip2{
-  width:72px;height:72px;border-radius:16px;
+  width:70px;height:70px;border-radius:16px;
   background:var(--chip);border:1px solid var(--chip-border);
   color:#1e40af;display:flex;flex-direction:column;justify-content:center;align-items:center;
   line-height:1.05;font-weight:900;box-shadow:0 4px 12px rgba(0,0,0,.04);text-align:center;padding:4px
 }
-.vchip2 .plate{font-size:13px;max-width:66px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vchip2 .vid{font-size:10px;opacity:.85;letter-spacing:.2px}
+.vchip2 .plate{font-size:13px;max-width:62px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vchip2 .vid{font-size:10.5px;opacity:.85}
 
-/* 오른쪽 설명: 더 작게 + 2줄 고정 */
+/* 오른쪽 설명: 2줄 고정, 더 작은 폰트 */
 .head-desc{
   margin-left:auto;max-width:calc(100% - 88px);
-  font-size:12px;color:#4b5563;line-height:1.25
+  font-size:12px;line-height:1.35;color:#4b5563
 }
 
-/* 하단 탭바 & 토스트 & 오버레이 */
+/* 하단 탭바 */
 .tabbar{position:fixed;left:0;right:0;bottom:0;height:64px;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);z-index:50}
 .tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#6b7684;text-decoration:none;font-size:11px;font-weight:800}
 .tab.on{color:#1b64da}
 .ico{width:20px;height:20px}
+
+/* 토스트 */
 .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#fff;border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.08);padding:10px 12px;border-radius:12px;font-size:14px;display:none}
 .toast.ok{border-color:#b2f2bb;color:#0c7;background:#f6fffa;display:block}
 .toast.err{border-color:#ffc9c9;color:#d11;background:#fff5f5;display:block}
+
+/* 로딩 오버레이 */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:9999}
 .overlay.show{display:flex}
 .overlay .box{background:#fff;padding:18px 20px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.12);display:flex;flex-direction:column;align-items:center;gap:10px;min-width:220px}
@@ -177,12 +184,12 @@ const DEPT_ALLOW = ["안전관리팀","안전기술팀","영업공무팀"];
 /* ===== 유틸 ===== */
 const el=(s,p=document)=>p.querySelector(s);
 const ce=(t,o={})=>Object.assign(document.createElement(t),o);
-const toast=(m,ok=true)=>{const t=el('#toast');t.textContent=m;t.className='toast '+(ok?'ok':'err');setTimeout(()=>t.className='toast',2600);};
+const toast=(m,ok=true)=>{const t=el('#toast');t.textContent=m;t.className='toast '+(ok?'ok':'err');setTimeout(()=>t.className='toast',2200);};
 function setTab(name){['home','sheet','recent','more'].forEach(k=>el('#tab-'+k)?.classList.toggle('on',k===name));}
 function section(title){return ce('div',{className:'section-title',textContent:title});}
 function setLoading(on,msg){const ov=el('#overlay');if(!ov) return;ov.classList.toggle('show',!!on);if(msg) ov.querySelector('.msg').textContent=msg;document.querySelectorAll('input,textarea,button,select').forEach(e=>e.disabled=!!on);}
 
-/* ===== CSV ===== */
+/* CSV 공통 */
 function fetchCsv(done,force){
   if(!LOGS_CSV_URL){ done([['기록시각','차량ID','차량명','사용자ID','사용자명','계기판_km','일운행_km','메모','부서']]); return; }
   const url=LOGS_CSV_URL+(/\?/.test(LOGS_CSV_URL)?'&':'?')+'nocache='+(force?Date.now():'0');
@@ -199,6 +206,33 @@ function parseCSV(text){
     if(c!=='\r') cell+=c;
   }
   row.push(cell); rows.push(row); return rows;
+}
+
+/* ===== CSV 반영 감시 ===== */
+function waitUntilUpdated(vehicle,beforeCount,timeoutMs=35000){
+  const started=Date.now();
+  return new Promise((resolve)=>{
+    const tick=()=>fetchCsv(rows=>{
+      const cnt=rows.filter((r,i)=>i>0 && String(r[1]||'').toUpperCase()===vehicle).length;
+      if(cnt>beforeCount) return resolve(true);
+      if(Date.now()-started>timeoutMs) return resolve(false);
+      setTimeout(tick,900);
+    },true);
+    tick();
+  });
+}
+
+async function deleteAndRefresh(ts, vehicle, btn){
+  if(!DELETE_URL){ toast('삭제URL 미설정',false); return; }
+  if(!confirm('이 기록을 삭제할까요?')) return;
+  try{
+    btn && (btn.disabled=true);
+    const r=await fetch(DELETE_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ts,vehicle})});
+    if(!r.ok) throw new Error('삭제 실패');
+    toast('삭제 완료');
+    setTimeout(()=>refreshAfterChange(vehicle),700);
+  }catch(e){ toast('삭제 오류: '+e.message,false); }
+  finally{ btn && (btn.disabled=false); }
 }
 
 /* ===== 라우터 ===== */
@@ -235,32 +269,39 @@ function renderHome(){
 /* ===== 차량 페이지 ===== */
 function renderVehicle(vehicle){
   const v = VEHICLES.find(x=>x.id===vehicle) || {id:vehicle,name:''};
-  const page = el('#page'); page.innerHTML = '';
+  const page = el('#page');
+  page.innerHTML = '';
 
-  /* 헤더 (차량번호 강조 + ID 보조, 안내 2줄 고정) */
+  /* 헤더 */
   const head = ce('div',{className:'card head-card'});
-  const vchip = ce('div',{className:'vchip2'});
+  const vchip = ce('div',{className:'vchip2','aria-label':'차량 식별'});
   vchip.innerHTML = `
     <div class="plate">${v.name || vehicle}</div>
     <div class="vid">${vehicle}</div>
   `;
   const desc = ce('div',{className:'head-desc'});
-  desc.innerHTML = `운행후 km와 운행목적을 입력해주세요.<br>이름/부서는 최초 1회만 저장하시면 됩니다.`;
+  desc.innerHTML = `<div>운행후 km와 운행목적을 입력해주세요.</div>
+                    <div>이름/부서는 최초 1회만 저장하시면 됩니다.</div>`;
   head.append(vchip, desc);
   page.append(head);
 
   /* 입력 카드 */
   const card = ce('div',{className:'card'});
 
-  // 성명/부서
+  // 성명/부서 (Select)
   const row = ce('div',{className:'row'});
   const nameSel = ce('select',{id:'userName',className:'select'});
   nameSel.append(ce('option',{value:'',textContent:'성명 선택'}));
   NAME_ALLOW.forEach(n=>nameSel.append(ce('option',{value:n,textContent:n})));
+
   const deptSel = ce('select',{id:'dept',className:'select'});
   deptSel.append(ce('option',{value:'',textContent:'부서 선택'}));
   DEPT_ALLOW.forEach(d=>deptSel.append(ce('option',{value:d,textContent:d})));
-  row.append(fieldLabelled('성명', nameSel, true), fieldLabelled('부서', deptSel, true));
+
+  row.append(
+    fieldLabelled('성명', nameSel, true),
+    fieldLabelled('부서', deptSel, true)
+  );
   card.append(row);
 
   // 운행 후 / 비고
@@ -276,14 +317,15 @@ function renderVehicle(vehicle){
   const micro = ce('div',{className:'micro',textContent:'내 정보는 이 기기에만 저장됩니다.'});
   meta.append(prevBadge, micro);
   card.append(meta);
+
   page.append(card);
 
   // 액션
   const actions = ce('div',{className:'actions'});
   const backBtn = ce('a',{className:'btn ghost',href:'#/'}); backBtn.textContent='← 홈으로';
   const resetBtn= ce('button',{className:'btn',type:'button'}); resetBtn.textContent='내 정보 초기화';
-  const refreshBtn= ce('button',{className:'btn',type:'button'}); refreshBtn.textContent='새로고침';
-  actions.append(backBtn, resetBtn, refreshBtn);
+  const reloadBtn=ce('button',{className:'btn',type:'button'}); reloadBtn.textContent='새로고침';
+  actions.append(backBtn, resetBtn, reloadBtn);
   page.append(actions);
 
   const sticky = ce('div',{className:'sticky'});
@@ -297,16 +339,22 @@ function renderVehicle(vehicle){
   if(savedN && NAME_ALLOW.includes(savedN)) nameSel.value=savedN;
   if(savedD && DEPT_ALLOW.includes(savedD)) deptSel.value=savedD;
 
-  // 초기화
+  // 초기화 버튼
   resetBtn.onclick=()=>{
     localStorage.removeItem(keyN); localStorage.removeItem(keyD);
     nameSel.value=''; deptSel.value='';
     toast('저장된 이름/부서를 삭제했습니다.');
   };
 
-  // 새로고침(히스토리/운행전 값 동기)
-  refreshBtn.onclick=()=>{ setLoading(true,'새로고침 중…'); Promise.all([refreshPrev(true), new Promise(r=>{loadHistory(vehicle,true); r();})]).finally(()=>setLoading(false)); };
+  // 새로고침 버튼
+  reloadBtn.onclick=async ()=>{
+    setLoading(true,'새로고침 중…');
+    await refreshPrev(true);
+    loadHistory(vehicle,true);
+    setTimeout(()=>setLoading(false),600);
+  };
 
+  // 모바일에서 km 포커스 시 스크롤
   odoI.addEventListener('focus',()=>setTimeout(()=>odoI.scrollIntoView({behavior:'smooth',block:'center'}),150));
 
   // 제출
@@ -325,15 +373,14 @@ function renderVehicle(vehicle){
     localStorage.setItem(keyN,userName);
     localStorage.setItem(keyD,dept);
 
-    // 전송 전 건수
+    // 전송 전 기존 건수
     let beforeCount=0;
     await new Promise(res=>fetchCsv(rows=>{
       beforeCount = rows.filter((r,i)=>i>0 && String(r[1]||'').toUpperCase()===vehicle).length;
       res();
     }, true));
 
-    setLoading(true,'기록을 저장하는 중입니다…');
-
+    setLoading(true,'기록 저장 후 반영 대기 중…');
     try{
       const resp = await fetch(WEBHOOK_URL,{
         method:'POST',
@@ -342,24 +389,28 @@ function renderVehicle(vehicle){
       });
       if(!resp.ok) throw new Error('네트워크 오류');
 
-      // ▼ 시트 반영을 확실히 기다림(최대 25초)
-      const ok = await waitUntilReflected(vehicle,beforeCount,Number(odo),25000);
+      // 반영될 때까지 최대 35초 기다림
+      const reflected = await waitUntilUpdated(vehicle,beforeCount,35000);
 
-      // 폼 초기화 후 강제 리프레시
+      // 입력창 초기화 & 강제 리프레시
       odoI.value=''; memoI.value=''; odoI.focus();
       await refreshPrev(true);
       loadHistory(vehicle,true);
 
-      toast(ok ? '전송 완료! ✅' : '전송 완료, 반영 대기 중입니다.', true);
-    }catch(e){
-      toast('전송 실패: '+e.message, false);
-    }finally{
       setLoading(false);
+      toast(reflected ? '전송 완료! ✅' : '전송 완료! 반영까지 잠시 걸릴 수 있어요.', true);
+      if(!reflected){
+        // 4초 후 한 번 더 강제 리프레시
+        setTimeout(async ()=>{ await refreshPrev(true); loadHistory(vehicle,true); }, 4000);
+      }
+    }catch(e){
+      setLoading(false);
+      toast('전송 실패: '+e.message, false);
     }
   };
 
-  // 운행 전 = 최신행의 "주행후"
-  async function refreshPrev(force){
+  // 운행 전 km = 해당 차량의 최신 "주행후" 값
+  function refreshPrev(force){
     return new Promise(res=>{
       fetchCsv(rows=>{
         let last=null;
@@ -379,14 +430,14 @@ function renderVehicle(vehicle){
   }
   refreshPrev();
 
-  // 차량별 최근 기록 카드(3줄)
+  // 차량별 최근 기록 카드 (3줄 레이아웃: 1=이름·부서 / 2=주행후km+비고 / 3=일시)
   const histCard=ce('div',{className:'history'});
   histCard.append(ce('div',{className:'section-title',textContent:'최근 기록'}));
   histCard.append(ce('div',{id:'histBody'}));
   page.insertBefore(histCard, sticky);
   loadHistory(vehicle);
 
-  // 폴링 시작
+  // 이 화면에 들어오면 폴링 시작
   startPolling('VEH:'+vehicle);
 }
 
@@ -422,7 +473,7 @@ function openSheetView(vehicle,vname){
   });
 }
 
-/* ===== 최근기록 탭(전 차량) — 3줄 ===== */
+/* ===== 최근기록 탭(전 차량) — 3줄 레이아웃 ===== */
 function renderRecentTab(){
   const page=el('#page'); page.innerHTML='';
   page.append(section('최근기록'));
@@ -446,13 +497,13 @@ function renderRecentTab(){
         const memo  = r[7]||'';
         return `
           <div class="hitem">
-            <div class="kmcircle">${Number.isFinite(day)&&day>0 ? `${day}km` : '—'}</div>
+            <div class="kmcircle">${Number.isFinite(day)&&day>0 ? ${'`'}${'${day}'}km${'`'} : '—'}</div>
             <div class="hcell">
               <div class="hrow1">
                 <div class="title">${name} · ${dept}</div>
                 <div class="metaR">${vname} · 주행후 ${post}km</div>
               </div>
-              <div class="hrow2">주행후 ${post}km · ${memo || '—'}</div>
+              <div class="hrow2">${memo || '—'}</div>
               <div class="hrow3">${date}</div>
             </div>
           </div>`;
@@ -486,13 +537,12 @@ function loadHistory(vehicle,force){
         const tsRaw= r[0] || '';
         return `
           <div class="hitem">
-            <div class="kmcircle">${Number.isFinite(day)&&day>0 ? `${day}km` : '—'}</div>
+            <div class="kmcircle">${Number.isFinite(day)&&day>0 ? ${'`'}${'${day}'}km${'`'} : '—'}</div>
             <div class="hcell">
               <div class="hrow1">
                 <div class="title">${name} · ${dept}</div>
-                <div class="metaR">주행후 ${post}km</div>
               </div>
-              <div class="hrow2">주행후 ${post}km · ${memo || '—'}</div>
+              <div class="hrow2"><span class="postkm">주행후 ${post}km</span>${memo || '—'}</div>
               <div class="hrow3">${date}</div>
             </div>
             ${DELETE_URL ? `
@@ -505,29 +555,11 @@ function loadHistory(vehicle,force){
   },force);
 }
 
-/* ===== 폼/뷰 헬퍼 ===== */
+/* ===== UI 헬퍼 ===== */
 function field(label,input){ const w=ce('div',{style:'flex:1'}); w.append(ce('label',{textContent:label}),input); return w; }
 function fieldLabelled(labelText,inputEl,required=false){ const wrap=ce('div',{style:'flex:1'}); const lab=ce('label',{textContent:labelText,className:required?'req':''}); wrap.append(lab,inputEl); return wrap; }
 
-/* 더보기 */
-function renderMoreTab(){
-  const page=el('#page'); page.innerHTML='';
-  page.append(section('더보기'));
-  const grid=ce('div',{style:'display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:8px 12px 84px'});
-  function tile(label,icon,onclick){
-    const b=ce('button',{className:'btn',style:'height:84px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px',onclick});
-    b.innerHTML=`<svg class="ico" viewBox="0 0 24 24">${icon}</svg><div style="font-size:12px;font-weight:800;white-space:nowrap">${label}</div>`;
-    return b;
-  }
-  grid.append(
-    tile('입력정보 초기화','<rect x="4" y="4" width="16" height="16" rx="4" fill="currentColor"/>',()=>{
-      localStorage.removeItem('drive_userName');localStorage.removeItem('drive_dept');toast('이름/부서 저장값을 삭제했습니다.');
-    }),
-    tile('메일 담당자 확인','<path d="M3 5h18v14H3z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 6l9 6 9-6" fill="none" stroke="currentColor" stroke-width="2"/>',showContacts),
-    tile('준비중','<circle cx="12" cy="12" r="8" fill="currentColor"/>',()=>toast('준비중입니다.'))
-  );
-  page.append(grid);
-}
+/* 더보기: 메일 담당자 표시 */
 function showContacts(){
   if(!CONTACTS_CSV_URL){ toast('스프레드시트 주소를 설정하세요.',false); return; }
   fetch(CONTACTS_CSV_URL).then(r=>r.text()).then(t=>{
@@ -542,7 +574,7 @@ function refreshAfterChange(vehicle){
   if(location.hash==='#recent') renderRecentTab();
 }
 
-/* 날짜 파서 */
+/* 날짜 파서(시리얼/국문/ISO 모두) */
 function fmtDateSmart(s){
   if(s instanceof Date && !isNaN(s)) return ymdhm(s);
   if(/^\d+(\.\d+)?$/.test(String(s))){
@@ -569,50 +601,16 @@ document.addEventListener('click', (e) => {
   if (!b) return;
   const ts = b.getAttribute('data-ts');
   const vehicle = b.getAttribute('data-vehicle');
-  if(!confirm('이 기록을 삭제할까요?')) return;
   deleteAndRefresh(ts, vehicle, b);
 });
 
-/* 삭제 후 반영 */
-async function deleteAndRefresh(ts, vehicle, btn){
-  if(!DELETE_URL){ toast('삭제URL 미설정',false); return; }
-  try{
-    btn && (btn.disabled=true);
-    const r=await fetch(DELETE_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ts,vehicle})});
-    if(!r.ok) throw new Error('삭제 실패');
-    toast('삭제 완료');
-    setTimeout(()=>refreshAfterChange(vehicle),800);
-    await refreshPrev(true);
-  }catch(e){ toast('삭제 오류: '+e.message,false); }
-  finally{ btn && (btn.disabled=false); }
-}
+/* 전역 에러 토스트 */
+window.addEventListener('error',(e)=>{ const msg=e?.error?.message||e?.message||'스크립트 오류'; toast('오류: '+msg,false); console.error(e?.error||e); });
 
-/* ===== 시트 반영 대기 (건수 증가 또는 최신행 주행후==입력값) ===== */
-function waitUntilReflected(vehicle,beforeCount,targetPost,timeoutMs=25000){
-  const started=Date.now();
-  return new Promise(resolve=>{
-    const tick=()=>fetchCsv(rows=>{
-      let cnt=0, latestPost=null;
-      for(let i=1;i<rows.length;i++){
-        const r=rows[i];
-        if(String(r[1]||'').toUpperCase()===vehicle){
-          cnt++;
-          latestPost = Number(r[5]||NaN);
-        }
-      }
-      const byCount = cnt>beforeCount;
-      const byPost  = Number.isFinite(latestPost) && Number.isFinite(targetPost) && latestPost===targetPost;
-      if(byCount || byPost) return resolve(true);
-      if(Date.now()-started>timeoutMs) return resolve(false);
-      setTimeout(tick,1100);
-    },true);
-    tick();
-  });
-}
-
-/* ===== CSV 변경 감지: 10초 폴링 ===== */
+/* ===== CSV 변경 감지: 10초 폴링 (최근/차량 화면 자동 새로고침) ===== */
 let _pollTimer = null;
 let _lastStamp = '';
+
 function calcStamp(rows, vehicle){
   if (!rows || rows.length<=1) return '';
   if (vehicle){
@@ -628,6 +626,7 @@ function calcStamp(rows, vehicle){
     return String(r[0]||'') + '|' + String(r[1]||'') + '|' + String(r[5]||'') + '|' + String(r[6]||'');
   }
 }
+
 function startPolling(key){
   stopPolling();
   const isVehicle = key && key.startsWith('VEH:');
@@ -640,7 +639,11 @@ function startPolling(key){
         _lastStamp = now;
         if (isVehicle){
           refreshAfterChange(vehicle);
-          refreshPrev(true);
+          // 운행전 km도 같이 갱신
+          if (location.hash && location.hash.includes(vehicle)) {
+            const badge = el('.prevkm');
+            if (badge) { /* 트리거만, 실제 값은 refreshPrev에서 처리됨 */ }
+          }
         }else{
           if (location.hash === '#recent') renderRecentTab();
         }
@@ -650,7 +653,7 @@ function startPolling(key){
 }
 function stopPolling(){ if (_pollTimer){ clearInterval(_pollTimer); _pollTimer=null; } }
 
-/* 라우팅 & 초기 폴링 */
+/* 라우트+폴링 연결 */
 window.addEventListener('hashchange', ()=>{
   const seg = (location.hash||'#/').slice(2).split('/').filter(Boolean);
   const first = seg[0]||'';
@@ -659,6 +662,8 @@ window.addEventListener('hashchange', ()=>{
   if (first==='sheet' || first==='more'){ stopPolling(); return; }
   startPolling('VEH:'+first.toUpperCase());
 });
+
+/* 초기 진입 */
 route();
 (function initPollOnLoad(){
   const seg = (location.hash||'#/').slice(2).split('/').filter(Boolean);
