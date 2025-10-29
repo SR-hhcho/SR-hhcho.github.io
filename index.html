@@ -300,42 +300,36 @@ function renderHome(){
 }
 
 /* ===== 차량 페이지 ===== */
+/* ===== 차량 페이지 ===== */
 function renderVehicle(vehicle){
   const v = VEHICLES.find(x=>x.id===vehicle) || {id:vehicle,name:''};
   const page = el('#page'); 
   page.innerHTML='';
 
-  // === 헤더(왼쪽 배지: 차량번호/ID 2줄, 오른쪽 설명 2줄) ===
+  // --- 헤더(왼쪽 배지 2줄 + 오른쪽 설명 2줄) ---
   const head = ce('div',{className:'card head-card'});
-
   const vchip = ce('div',{className:'vchip2'});
   vchip.innerHTML = `
     <div class="plate">${v.name || vehicle}</div>
     <div class="vid">${vehicle}</div>
   `;
-
-  const desc = ce('div',{
-    className:'head-desc',
+  const desc = ce('div',{className:'head-desc',
     textContent:'운행 후 km(숫자)와 운행목적(비고)을 입력해주세요. 이름/부서는 최초 1회만 저장됩니다.'
   });
-
   head.append(vchip, desc);
   page.append(head);
 
-  // ↓ (이 아래부터 기존 코드 계속)
+  // --- 입력 카드 ---
   const card = ce('div',{className:'card'});
-  // ... 성명/부서/운행후/비고 입력 영역 등 기존 로직 유지
-}
 
-
-  // 성명/부서 (Select)
+  // 성명/부서(Select)
   const row=ce('div',{className:'row'});
   const nameSel=ce('select',{id:'userName',className:'select'});
   nameSel.append(ce('option',{value:'',textContent:'성명 선택'}));
   NAME_ALLOW.forEach(n=>nameSel.append(ce('option',{value:n,textContent:n})));
   const deptSel=ce('select',{id:'dept',className:'select'});
   deptSel.append(ce('option',{value:'',textContent:'부서 선택'}));
-  DEPT_ALLOW.forEach(d=>deptSel.append(ce('option',{value:d,textContent:d})));
+  DEPT_ALLOW.forEach(d=>deptSel.append(ce('option',{value:d,textContent:d)}));
   row.append(fieldLabelled('성명',nameSel,true), fieldLabelled('부서',deptSel,true));
   card.append(row);
 
@@ -348,7 +342,7 @@ function renderVehicle(vehicle){
 
   // 운행전 배지 + 미세 안내
   const meta=ce('div',{style:'display:flex;align-items:center;gap:8px'});
-  const prevBadge=ce('span',{className:'prevkm',textContent:'운행 전: 확인중…'});
+  const prevBadge=ce('span',{id:'prevkm-badge',className:'prevkm',textContent:'운행 전: 확인중…'});
   const micro=ce('div',{className:'micro',textContent:'내 정보는 이 기기에만 저장됩니다.'});
   meta.append(prevBadge,micro);
   card.append(meta);
@@ -373,8 +367,15 @@ function renderVehicle(vehicle){
   if(savedN && NAME_ALLOW.includes(savedN)) nameSel.value=savedN;
   if(savedD && DEPT_ALLOW.includes(savedD)) deptSel.value=savedD;
 
-  resetBtn.onclick=()=>{ localStorage.removeItem(keyN); localStorage.removeItem(keyD); nameSel.value=''; deptSel.value=''; toast('저장된 이름/부서를 삭제했습니다.'); };
+  // 초기화
+  resetBtn.onclick=()=>{
+    localStorage.removeItem(keyN);
+    localStorage.removeItem(keyD);
+    nameSel.value=''; deptSel.value='';
+    toast('저장된 이름/부서를 삭제했습니다.');
+  };
 
+  // 모바일 편의
   odoI.addEventListener('focus',()=>setTimeout(()=>odoI.scrollIntoView({behavior:'smooth',block:'center'}),150));
 
   // 제출
@@ -396,13 +397,18 @@ function renderVehicle(vehicle){
     // 전송 전 기존 건수
     let beforeCount=0;
     await new Promise(res=>fetchCsv(rows=>{
-      beforeCount=rows.filter((r,i)=>i>0 && String(r[1]||'').toUpperCase()===vehicle).length; res();
+      beforeCount=rows.filter((r,i)=>i>0 && String(r[1]||'').toUpperCase()===vehicle).length; 
+      res();
     },true));
 
     setLoading(true,'기록을 저장하는 중입니다…');
 
     try{
-      const resp=await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({vehicle,userName,dept,odo,memo})});
+      const resp=await fetch(WEBHOOK_URL,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({vehicle,userName,dept,odo,memo})
+      });
       if(!resp.ok) throw new Error('네트워크 오류');
 
       const ok=await waitUntilUpdated(vehicle,beforeCount,15000);
@@ -411,10 +417,12 @@ function renderVehicle(vehicle){
       refreshPrev(true);
       loadHistory(vehicle,true);
       setTimeout(()=>refreshAfterChange(vehicle),1200);
-
       toast(ok?'전송 완료! ✅':'전송은 완료, 반영 대기 중입니다.',ok);
-    }catch(e){ toast('전송 실패: '+e.message,false); }
-    finally{ setLoading(false); }
+    }catch(e){
+      toast('전송 실패: '+e.message,false);
+    }finally{
+      setLoading(false);
+    }
   };
 
   // 운행 전 km 표시
@@ -428,7 +436,7 @@ function renderVehicle(vehicle){
       if(last){
         const post=Number(last[5]||''); const day=Number(last[6]||'');
         const pre=(Number.isFinite(post)&&Number.isFinite(day))?(post-day):NaN;
-        prevBadge.textContent = Number.isFinite(pre)? `운행 전: ${pre} km` : (Number.isFinite(post)? `운행 전: —` : '운행 전: —');
+        prevBadge.textContent = Number.isFinite(pre)? `운행 전: ${pre} km` : '운행 전: —';
       }else{
         prevBadge.textContent='운행 전: (첫 기록)';
       }
@@ -650,8 +658,18 @@ document.addEventListener('click', (e) => {
 
 /* 전역 에러 토스트 */
 window.addEventListener('error',(e)=>{ const msg=e?.error?.message||e?.message||'스크립트 오류'; toast('오류: '+msg,false); console.error(e?.error||e); });
+
+
+  /* ===== CSV 변경 감지 & 자동 새로고침 ===== */
+  let __csvFinger = null;
+  async function getCsvFingerprint(){ /* ... */ }
+  function refreshVisible(){ /* ... */ }
+  async function startAutoRefresh(){ /* ... */ }
+  startAutoRefresh();
+  
 </script>
 </body>
 </html>
+
 
 
