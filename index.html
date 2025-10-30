@@ -6,8 +6,14 @@
 <meta name="theme-color" content="#1b64da" />
 <title>업무용 운행기록</title>
 
+<!-- 폰트: 안정적 경로 + 버전 고정 -->
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css"/>
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css"
+      crossorigin>
+
+<!-- 파비콘(원하면 유지/수정 가능) -->
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'><rect width='128' height='128' rx='24' fill='%231b64da'/><text x='50%' y='58%' text-anchor='middle' dominant-baseline='middle' font-family='Arial' font-size='84' fill='white'>차</text></svg>'>
 
 <style>
 :root{
@@ -43,7 +49,7 @@ body{
 .card{background:#fff;margin:8px 12px;padding:14px;border-radius:14px;box-shadow:0 6px 24px rgba(17,17,17,.06)}
 .row{display:flex;gap:8px}
 label{display:block;font-size:12px;color:var(--sub);margin:8px 2px 4px}
-label.req::after{content:" *";color:#1b64da;font-weight:900}  /* ⬅️ 필수표시 복구 */
+label.req::after{content:" *";color:#1b64da;font-weight:900}  /* ⬅️ 필수표시 */
 input,textarea,select{
   width:100%;font-size:16px;padding:12px 12px;border-radius:12px;border:1px solid var(--line);
   background:#fff;outline:none;transition:border .15s,box-shadow .15s;font-family:inherit
@@ -205,3 +211,488 @@ function parseCSV(text){
     const c=text[i],n=text[i+1];
     if(q){ if(c==='"'&&n!='"'){q=false;continue;} if(c==='"'&&n==='"'){cell+='"';i++;continue;} cell+=c; continue; }
     if(c===','){ row.push(cell); cell=''; continue; }
+    if(c==='\n'){ row.push(cell); rows.push(row); row=[]; cell=''; continue; }
+    if(c==='"'){ q=true; continue; }
+    if(c!=='\r') cell+=c;
+  }
+  row.push(cell); rows.push(row); return rows;
+}
+
+/* ===== 라우터 ===== */
+function route(){
+  const seg=(location.hash||'#/').slice(2).split('/').filter(Boolean);
+  const first=seg[0]||'';
+  if(!first){ renderHome(); setTab('home'); return; }
+  if(first==='sheet'){ renderSheetTab(); setTab('sheet'); return; }
+  if(first==='recent'){ renderRecentTab(); setTab('recent'); return; }
+  if(first==='more'){ renderMoreTab(); setTab('more'); return; }
+  renderVehicle(first.toUpperCase()); setTab('home');
+}
+window.addEventListener('hashchange',route);
+if(!location.hash) location.hash = '#/';  // 기본 홈 진입
+route();
+
+/* ===== 홈 ===== */
+function renderHome(){
+  const page=el('#page'); page.innerHTML='';
+  const p1=ce('p',{className:'caption',textContent:'차량을 선택해 기록하세요.'});
+  const grid=ce('div',{className:'list'});
+  VEHICLES.forEach(v=>{
+    const a=ce('a',{className:'tile',href:'#/'+encodeURIComponent(v.id)});
+    const img=ce('img',{className:'avatar',src:v.img||''});
+    img.onerror=function(){const s=this.src;if(/\.png$/i.test(s)) this.src=s.replace(/\.png$/i,'.jpg'); else if(/\.jpg$/i.test(s)) this.src=s.replace(/\.jpg$/i,'.png'); else this.remove();};
+    const left=ce('div',{className:'tile-left'});
+    left.append(img,ce('span',{className:'plate',textContent:(v.name||'')}));
+    const right=ce('span',{className:'idtag',textContent:v.id});
+    a.append(left,right);
+    grid.append(a);
+  });
+  page.append(p1,grid);
+}
+
+/* ===== 차량 페이지 ===== */
+function renderVehicle(vehicle){
+  const v = VEHICLES.find(x=>x.id===vehicle) || {id:vehicle,name:''};
+  const page = el('#page');
+  page.innerHTML = '';
+
+  /* 헤더(왼쪽 차량번호/ID 2줄 + 오른쪽 설명 2줄) */
+  const head = ce('div',{className:'card head-card'});
+  const vchip = ce('div',{className:'vchip2'});
+  vchip.innerHTML = `
+    <div class="plate">${v.name || vehicle}</div>
+    <div class="vid">${vehicle}</div>
+  `;
+  const desc = ce('div',{className:'head-desc'});
+  desc.innerHTML = `운행후 km와 운행목적을 입력해주세요.<br>이름/부서는 최초 1회만 저장하시면 됩니다.`;
+  head.append(vchip, desc);
+  page.append(head);
+
+  /* 입력 카드 */
+  const card = ce('div',{className:'card'});
+
+  // 성명/부서 (Select)
+  const row = ce('div',{className:'row'});
+  const nameSel = ce('select',{id:'userName',className:'select'});
+  nameSel.append(ce('option',{value:'',textContent:'성명 선택'}));
+  NAME_ALLOW.forEach(n=>nameSel.append(ce('option',{value:n,textContent:n})));
+
+  const deptSel = ce('select',{id:'dept',className:'select'});
+  deptSel.append(ce('option',{value:'',textContent:'부서 선택'}));
+  DEPT_ALLOW.forEach(d=>deptSel.append(ce('option',{value:d,textContent:d})));
+
+  row.append(
+    fieldLabelled('성명', nameSel, /*required=*/true),
+    fieldLabelled('부서', deptSel, /*required=*/true)
+  );
+  card.append(row);
+
+  // 운행 후 / 비고
+  const row2 = ce('div',{className:'row'});
+  const odoI  = ce('input',{id:'odo',type:'number',inputMode:'numeric',placeholder:'예) 21840'});
+  const memoI = ce('textarea',{id:'memo',placeholder:'시설점검 등'});
+  row2.append(fieldLabelled('운행 후 km(숫자)', odoI, true), field('비고(선택)', memoI));
+  card.append(row2);
+
+  // 운행전 배지 + 미세 안내
+  const meta = ce('div',{style:'display:flex;align-items:center;gap:8px'});
+  const prevBadge = ce('span',{className:'prevkm',textContent:'운행 전: 확인중…'});
+  const micro = ce('div',{className:'micro',textContent:'내 정보는 이 기기에만 저장됩니다.'});
+  meta.append(prevBadge, micro);
+  card.append(meta);
+  page.append(card);
+
+  // 액션
+  const actions = ce('div',{className:'actions'});
+  const backBtn = ce('a',{className:'btn ghost',href:'#/'}); backBtn.textContent='← 홈으로';
+  const resetBtn= ce('button',{className:'btn',type:'button'}); resetBtn.textContent='내 정보 초기화';
+  const refreshBtn= ce('button',{className:'btn',type:'button'}); refreshBtn.textContent='새로고침';
+  actions.append(backBtn, resetBtn, refreshBtn);
+  page.append(actions);
+
+  const sticky = ce('div',{className:'sticky'});
+  const submit = ce('button',{className:'primary',textContent:'제출하기',type:'button'});
+  sticky.append(submit);
+  page.append(sticky);
+
+  // 저장값 복원
+  const keyN='drive_userName', keyD='drive_dept';
+  const savedN=localStorage.getItem(keyN), savedD=localStorage.getItem(keyD);
+  if(savedN && NAME_ALLOW.includes(savedN)) nameSel.value=savedN;
+  if(savedD && DEPT_ALLOW.includes(savedD)) deptSel.value=savedD;
+
+  // 초기화 버튼
+  resetBtn.onclick=()=>{
+    localStorage.removeItem(keyN); localStorage.removeItem(keyD);
+    nameSel.value=''; deptSel.value='';
+    toast('저장된 이름/부서를 삭제했습니다.');
+  };
+
+  // 새로고침 버튼
+  refreshBtn.onclick=()=>{
+    setLoading(true,'새로고침 중…');
+    refreshPrev(true);
+    loadHistory(vehicle,true);
+    setTimeout(()=>setLoading(false),400);
+  };
+
+  // 모바일에서 km 포커스 시 스크롤
+  odoI.addEventListener('focus',()=>setTimeout(()=>odoI.scrollIntoView({behavior:'smooth',block:'center'}),150));
+
+  // 제출
+  submit.onclick = async () => {
+    const userName = nameSel.value;
+    const dept     = deptSel.value;
+    const odo      = odoI.value.trim();
+    const memo     = memoI.value.trim();
+
+    if(!userName){ toast('성명을 선택해주세요', false); nameSel.focus(); return; }
+    if(!dept){     toast('부서를 선택해주세요', false);  deptSel.focus(); return; }
+    if(!odo || isNaN(+odo)){ toast('운행 후 km(숫자)를 입력해주세요', false); odoI.focus(); return; }
+    if(!NAME_ALLOW.includes(userName)){ toast('성명은 목록에서 선택해주세요.', false); nameSel.focus(); return; }
+    if(!DEPT_ALLOW.includes(dept)){     toast('부서는 목록에서 선택해주세요.', false);  deptSel.focus(); return; }
+
+    localStorage.setItem(keyN,userName);
+    localStorage.setItem(keyD,dept);
+
+    // 전송 전 기존 건수(해당 차량만)
+    let beforeCount=0;
+    await new Promise(res=>fetchCsv(rows=>{
+      beforeCount = rows.filter((r,i)=>i>0 && String(r[1]||'').toUpperCase()===vehicle).length;
+      res();
+    }, true));
+
+    setLoading(true,'기록을 저장하는 중입니다…');
+
+    try{
+      const resp = await fetch(WEBHOOK_URL,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({vehicle,userName,dept,odo,memo})
+      });
+      if(!resp.ok) throw new Error('네트워크 오류');
+
+      // 시트 반영 대기(최대 15초). true/false 상관없이 UI는 갱신 시도
+      const ok = await waitUntilUpdated(vehicle,beforeCount,15000);
+
+      // 입력창 초기화 & 반영 시도
+      odoI.value=''; memoI.value=''; odoI.focus();
+      await refreshPrev(true);
+      loadHistory(vehicle,true);
+
+      // 1.2초 후 한 번 더(딜레이 반영 대비)
+      setTimeout(()=>{ refreshPrev(true); loadHistory(vehicle,true); },1200);
+
+      toast(ok ? '전송 완료! ✅' : '전송은 완료, 반영 대기 중입니다.', ok);
+    }catch(e){
+      toast('전송 실패: '+e.message, false);
+    }finally{
+      setLoading(false);
+    }
+  };
+
+  // 운행 전 km 표시(해당 차량의 "가장 최신" 행 기준: 맨 끝에서부터 최초 매칭)
+  async function refreshPrev(force){
+    return new Promise(res=>{
+      fetchCsv(rows=>{
+        let last=null;
+        for(let i=rows.length-1;i>=1;i--){
+          const r=rows[i];
+          if(String(r[1]||'').toUpperCase()===vehicle){ last=r; break; }
+        }
+        if(last){
+          const post=Number(last[5]||''); // 주행후
+          const day =Number(last[6]||''); // 일운행
+          const pre=(Number.isFinite(post)&&Number.isFinite(day))?(post-day):NaN;
+          prevBadge.textContent = Number.isFinite(pre)? `운행 전: ${pre} km` : '운행 전: —';
+        }else{
+          prevBadge.textContent='운행 전: (첫 기록)';
+        }
+        res();
+      }, force);
+    });
+  }
+  refreshPrev();
+
+  // 차량별 최근 기록 카드 (3줄 구성)
+  const histCard=ce('div',{className:'history'});
+  histCard.append(ce('div',{className:'section-title',textContent:'최근 기록'}));
+  histCard.append(ce('div',{id:'histBody'}));
+  page.insertBefore(histCard, sticky);
+  loadHistory(vehicle);
+
+  // 이 화면에 들어오면 폴링 시작
+  startPolling('VEH:'+vehicle);
+}
+
+/* ===== 운행일지 탭 ===== */
+function renderSheetTab(){
+  const page=el('#page'); page.innerHTML='';
+  page.append(section('운행일지'));
+  page.append(ce('p',{className:'caption',textContent:'차량을 선택해 “운행일지 양식”을 읽기 모드로 확인하세요.'}));
+  const grid=ce('div',{className:'grid'});
+  VEHICLES.forEach(v=>{
+    const a=ce('a',{className:'mini',href:'#',onclick:e=>{e.preventDefault();openSheetView(v.id,v.name);}});
+    a.textContent=`${v.name} (${v.id})`;
+    grid.append(a);
+  });
+  page.append(grid,ce('div',{id:'sheetView',className:'card'}));
+}
+function openSheetView(vehicle,vname){
+  const host=el('#sheetView'); host.innerHTML='';
+  host.append(section(`${vname} · ${vehicle}`));
+  fetchCsv(rows=>{
+    const body=rows.filter((r,i)=>i>0 && String(r[1]||'').toUpperCase()===vehicle);
+    const table=ce('table',{className:'table'});
+    table.innerHTML='<thead><tr><th>일자</th><th>부서</th><th>성명</th><th>주행전</th><th>주행후</th><th>주행거리</th><th>비고</th></tr></thead><tbody></tbody>';
+    const tb=table.querySelector('tbody');
+    body.forEach(r=>{
+      const date=fmtDateSmart(r[0]||''), dept=r[8]||'', name=r[4]||'', post=Number(r[5]||0), day=Number(r[6]||0), memo=r[7]||'';
+      const pre=(Number.isFinite(post)&&Number.isFinite(day))?(post-day):'';
+      const tr=ce('tr');
+      tr.innerHTML=`<td>${date}</td><td>${dept}</td><td>${name}</td><td>${pre}</td><td>${post}</td><td>${day}</td><td>${memo}</td>`;
+      tb.append(tr);
+    });
+    host.append(table);
+  });
+}
+
+/* ===== 최근기록 탭 ===== */
+function renderRecentTab(){
+  const page=el('#page'); page.innerHTML='';
+  page.append(section('최근기록'));
+  const box=ce('div',{className:'history'}); box.innerHTML='<div id="recentList"></div>';
+  const pager=ce('div',{className:'pager',id:'pager'});
+  page.append(box,pager);
+
+  fetchCsv(rows=>{
+    const items=rows.filter((r,i)=>i>0).reverse();
+    const per=10, maxPages=Math.min(5,Math.ceil(items.length/per)||1);
+    let cur=1;
+    function draw(){
+      const slice=items.slice((cur-1)*per,(cur-1)*per+per);
+      el('#recentList').innerHTML = slice.map(r=>{
+        const date  = fmtDateSmart(r[0]||'');
+        const vid   = r[1]||'';
+        const vname = (VEHICLES.find(v=>v.id===vid)?.name) || vid;
+        const name  = r[4]||'', dept=r[8]||'';
+        const post  = Number(r[5]||0);   // 주행후
+        const day   = Number(r[6]||0);   // 일운행(운행거리)
+        const memo  = r[7]||'';
+        return `
+          <div class="hitem">
+            <div class="kmcircle">${Number.isFinite(day)&&day>0 ? `${day}km` : '—'}</div>
+            <div class="hcell">
+              <div class="hrow1">
+                <div class="title">${name} · ${dept}</div>
+                <div class="metaR">${vname}</div>
+              </div>
+              <div class="hrow2"><span class="postkm">주행후 ${post}km</span>${memo ? `${memo}` : ''}</div>
+              <div class="hrow3">${date}</div>
+            </div>
+          </div>`;
+      }).join('') || '<div class="hmeta">기록이 없습니다.</div>';
+
+      pager.innerHTML='';
+      for(let i=1;i<=maxPages;i++){
+        const b=ce('button',{textContent:String(i)});
+        if(i===cur) b.className='on';
+        b.onclick=()=>{cur=i;draw();};
+        pager.append(b);
+      }
+    }
+    draw();
+  });
+
+  // 최근 탭 들어오면 폴링 키 전환
+  startPolling('RECENT');
+}
+
+/* ===== 차량별 히스토리 + 삭제 ===== */
+function loadHistory(vehicle,force){
+  const body=el('#histBody'); if(!body) return;
+  fetchCsv(rows=>{
+    const out = rows
+      .filter((r,i)=> i>0 && String(r[1]||'').trim().toUpperCase()===vehicle)
+      .slice(-30).reverse()
+      .map(r=>{
+        const date = fmtDateSmart(r[0]||'');
+        const name = r[4]||'', dept=r[8]||'';
+        const post = Number(r[5]||0);      // 주행후
+        const day  = Number(r[6]||0);      // 운행거리
+        const memo = r[7]||'';
+        const tsRaw = r[0] || '';
+        return `
+          <div class="hitem">
+            <div class="kmcircle">${Number.isFinite(day)&&day>0 ? `${day}km` : '—'}</div>
+            <div class="hcell">
+              <div class="hrow1">
+                <div class="title">${name} · ${dept}</div>
+                <div class="metaR">주행후 ${post}km</div>
+              </div>
+              <div class="hrow2">${memo ? `${memo}` : ''}</div>
+              <div class="hrow3">${date}</div>
+            </div>
+            ${DELETE_URL ? `
+              <button class="btn small" data-action="delete"
+                data-ts="${String(tsRaw).replace(/"/g,'&quot;')}"
+                data-vehicle="${vehicle}">삭제</button>` : ''}
+          </div>`;
+      }).join('') || '<div class="item meta">기록이 없습니다.</div>';
+    body.innerHTML=out;
+  },force);
+}
+
+/* ===== UI 헬퍼 ===== */
+function field(label,input){ const w=ce('div',{style:'flex:1'}); w.append(ce('label',{textContent:label}),input); return w; }
+function fieldLabelled(labelText,inputEl,required=false){ const wrap=ce('div',{style:'flex:1'}); const lab=ce('label',{textContent:labelText,className:required?'req':''}); wrap.append(lab,inputEl); return wrap; }
+
+/* ===== 더보기: 메일 담당자 표시 ===== */
+function renderMoreTab(){
+  const page=el('#page'); page.innerHTML='';
+  page.append(section('더보기'));
+  const grid=ce('div',{style:'display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:8px 12px 84px'});
+  function tile(label,icon,onclick){
+    const b=ce('button',{className:'btn',style:'height:84px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px',onclick});
+    b.innerHTML=`<svg class="ico" viewBox="0 0 24 24">${icon}</svg><div style="font-size:12px;font-weight:800;white-space:nowrap">${label}</div>`;
+    return b;
+  }
+  grid.append(
+    tile('입력정보 초기화','<rect x="4" y="4" width="16" height="16" rx="4" fill="currentColor"/>',()=>{
+      localStorage.removeItem('drive_userName');localStorage.removeItem('drive_dept');toast('이름/부서 저장값을 삭제했습니다.');
+    }),
+    tile('메일 담당자 확인','<path d="M3 5h18v14H3z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 6l9 6 9-6" fill="none" stroke="currentColor" stroke-width="2"/>',showContacts),
+    tile('준비중','<circle cx="12" cy="12" r="8" fill="currentColor"/>',()=>toast('준비중입니다.'))
+  );
+  page.append(grid);
+}
+function showContacts(){
+  if(!CONTACTS_CSV_URL){ toast('스프레드시트 주소를 설정하세요.',false); return; }
+  fetch(CONTACTS_CSV_URL).then(r=>r.text()).then(t=>{
+    const rows=parseCSV(t).filter((r,i)=>i>0).map(r=>r[0]).filter(Boolean);
+    alert('메일 담당자\n\n- '+rows.join('\n- '));
+  }).catch(()=>toast('불러오기 실패',false));
+}
+
+/* ===== 공통: 반영 대기 폴링 ===== */
+function waitUntilUpdated(vehicle,beforeCount,timeoutMs=12000){
+  const started=Date.now();
+  return new Promise((resolve)=>{
+    const tick=()=>fetchCsv(rows=>{
+      const cnt=rows.filter((r,i)=>i>0 && String(r[1]||'').toUpperCase()===vehicle).length;
+      if(cnt>beforeCount) return resolve(true);
+      if(Date.now()-started>timeoutMs) return resolve(false);
+      setTimeout(tick,800);
+    },true);
+    tick();
+  });
+}
+
+/* ===== 공통 리프레시 ===== */
+function refreshAfterChange(vehicle){
+  if(vehicle) loadHistory(vehicle,true);
+  if(location.hash==='#recent') renderRecentTab();
+}
+
+/* ===== 날짜 파서(시리얼/국문/ISO 모두) ===== */
+function fmtDateSmart(s){
+  if(s instanceof Date && !isNaN(s)) return ymdhm(s);
+  if(/^\d+(\.\d+)?$/.test(String(s))){
+    const d=new Date(Math.round((Number(s)-25569)*86400*1000));
+    if(!isNaN(d)) return ymdhm(d);
+  }
+  const kr=String(s).trim();
+  const m=kr.match(/^(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일\s*(오전|오후)\s*(\d{1,2}):(\d{2})/);
+  if(m){
+    let[,y,mo,d,ap,h,mi]=m; y=+y; mo=+mo; d=+d; h=+h; mi=+mi;
+    if(ap==='오후'&&h<12) h+=12;
+    if(ap==='오전'&&h===12) h=0;
+    const dt=new Date(y,mo-1,d,h,mi);
+    if(!isNaN(dt)) return ymdhm(dt);
+  }
+  const d2=new Date(s); if(!isNaN(d2)) return ymdhm(d2);
+  return String(s);
+}
+function ymdhm(d){ const yoil=['일','월','화','수','목','금','토'][d.getDay()]; const pad=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())}(${yoil}) ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+
+/* ===== 삭제 버튼 위임 ===== */
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-action="delete"]');
+  if (!b) return;
+  const ts = b.getAttribute('data-ts');
+  const vehicle = b.getAttribute('data-vehicle');
+  deleteAndRefresh(ts, vehicle, b);
+});
+async function deleteAndRefresh(ts, vehicle, btn){
+  if(!DELETE_URL){ toast('삭제URL 미설정',false); return; }
+  if(!confirm('이 기록을 삭제할까요?')) return;
+  try{
+    btn && (btn.disabled=true);
+    const r=await fetch(DELETE_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ts,vehicle})});
+    if(!r.ok) throw new Error('삭제 실패');
+    toast('삭제 완료');
+    setTimeout(()=>refreshAfterChange(vehicle),700);
+  }catch(e){ toast('삭제 오류: '+e.message,false); }
+  finally{ btn && (btn.disabled=false); }
+}
+
+/* ===== 10초 자동 새로고침(최근/차량) ===== */
+let _pollTimer = null;
+let _lastStamp = '';
+function calcStamp(rows, vehicle){
+  if (!rows || rows.length<=1) return '';
+  if (vehicle){
+    for(let i=rows.length-1;i>=1;i--){
+      const r=rows[i];
+      if ((r[1]||'').toUpperCase()===vehicle) {
+        return String(r[0]||'') + '|' + String(r[5]||'') + '|' + String(r[6]||'');
+      }
+    }
+    return '';
+  }else{
+    const r = rows[rows.length-1] || [];
+    return String(r[0]||'') + '|' + String(r[1]||'') + '|' + String(r[5]||'') + '|' + String(r[6]||'');
+  }
+}
+function startPolling(key){
+  stopPolling();
+  const isVehicle = key && key.startsWith('VEH:');
+  const vehicle = isVehicle ? key.slice(4) : null;
+
+  fetchCsv(rows=>{ _lastStamp = calcStamp(rows, vehicle); }, true);
+
+  _pollTimer = setInterval(()=>{
+    fetchCsv(rows=>{
+      const now = calcStamp(rows, vehicle);
+      if (now && now !== _lastStamp){
+        _lastStamp = now;
+        if (isVehicle){ refreshAfterChange(vehicle); }
+        else { if (location.hash === '#recent') renderRecentTab(); }
+      }
+    }, true);
+  }, 10000);
+}
+function stopPolling(){ if (_pollTimer){ clearInterval(_pollTimer); _pollTimer=null; } }
+
+// 라우트 변경에 맞춰 폴링 키 전환
+const _origRoute = route;
+window.removeEventListener('hashchange', route);
+window.addEventListener('hashchange', ()=>{
+  _origRoute();
+  const seg = (location.hash||'#/').slice(2).split('/').filter(Boolean);
+  const first = seg[0]||'';
+  if (!first){ stopPolling(); return; }
+  if (first==='recent'){ startPolling('RECENT'); return; }
+  if (first==='sheet' || first==='more'){ stopPolling(); return; }
+  startPolling('VEH:'+first.toUpperCase());
+});
+// 초기 진입 시 폴링 상태도 맞춤
+(function initPollOnLoad(){
+  const seg = (location.hash||'#/').slice(2).split('/').filter(Boolean);
+  const first = seg[0]||'';
+  if (first==='recent'){ startPolling('RECENT'); }
+  else if (first && !['sheet','more'].includes(first)){ startPolling('VEH:'+first.toUpperCase()); }
+})();
+</script>
+</body>
+</html>
