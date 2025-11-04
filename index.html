@@ -6,13 +6,10 @@
 <meta name="theme-color" content="#1b64da" />
 <title>업무용 운행기록</title>
 
-<!-- Pretendard: 고정 버전 경로 -->
+<!-- Pretendard 고정 버전 -->
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="stylesheet"
-      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css"
-      crossorigin>
-
-<!-- QR 코드 생성 라이브러리 (경량, 캔버스 출력) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css" crossorigin>
+<!-- QRCode 라이브러리 -->
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 
 <style>
@@ -36,7 +33,7 @@ body{
 .apptitle{justify-self:center;font-weight:900;font-size:17px;letter-spacing:-0.3px}
 .apptitle a{color:inherit;text-decoration:none}
 
-/* 공통 텍스트 */
+/* 텍스트 */
 .section-title{margin:10px 16px 4px;font-weight:900;color:#1b64da;font-size:13px}
 .caption{color:var(--sub);font-size:13px;margin:6px 16px 8px}
 
@@ -52,7 +49,7 @@ input,textarea,select{
 input:focus,textarea:focus,select:focus{border-color:#b4c6ff;box-shadow:0 0 0 3px rgba(27,100,218,.15)}
 textarea{height:44px;resize:none}
 
-/* 버튼/액션 */
+/* 버튼 */
 .actions{display:flex;gap:8px;margin:8px 12px;flex-wrap:wrap}
 .btn{appearance:none;border:1px solid var(--line);background:#fff;color:#374151;border-radius:12px;padding:10px 14px;font-size:14px;font-weight:800;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
 .btn:hover{filter:brightness(0.98)}
@@ -63,29 +60,31 @@ button.primary:active{background:var(--blue-press)}
 
 /* 홈 타일 */
 .list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin:8px 12px 84px}
-.tile{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 12px;text-decoration:none;color:#111;display:flex;align-items:center;gap:12px;box-shadow:0 4px 14px rgba(0,0,0,.04)}
+.tile{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 12px;text-decoration:none;color:#111;display:flex;align-items:center;gap:12px;box-shadow:0 4px 14px rgba(0,0,0,.04);position:relative}
 .tile img{width:44px;height:28px;object-fit:cover;border-radius:6px;border:1px solid var(--line)}
 .tile-left{display:flex;align-items:center;gap:10px;min-width:0}
-.plate{font-weight:900;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60vw}
+.plate{font-weight:900;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:50vw}
 .idtag{font-size:11px;font-weight:800;color:#1e40af;background:#eef2ff;padding:2px 8px;border-radius:999px;border:1px solid #dbe6ff;white-space:nowrap}
+/* 홈 타일 QR 버튼 */
+.qr-mini{margin-left:auto;appearance:none;border:1px dashed #b6c3ff;background:#f6f8ff;color:#1b64da;border-radius:10px;padding:8px 10px;font-size:12px;font-weight:900;cursor:pointer}
 
-/* 차량 헤더 — 폰트 줄이고 박스 약간 키움 */
+/* 차량 헤더 — 가로 넓고 세로 얕은 직사각형 */
 .head-card{display:flex;gap:12px;align-items:center}
 .vchip2{
-  width:72px;height:72px;border-radius:14px;
+  width:128px;height:58px;border-radius:12px;
   background:var(--chip);border:1px solid var(--chip-border);
   color:#1e40af;display:flex;flex-direction:column;justify-content:center;align-items:center;
-  line-height:1.05;font-weight:900;box-shadow:0 4px 12px rgba(0,0,0,.04);text-align:center;padding:4px
+  line-height:1.05;font-weight:900;box-shadow:0 4px 12px rgba(0,0,0,.04);text-align:center;padding:6px 8px
 }
-.vchip2 .plate{font-size:12px;max-width:64px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vchip2 .plate{font-size:12.5px;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vchip2 .vid{font-size:10px;opacity:.9}
-.head-desc{margin-left:auto;max-width:calc(100% - 100px);font-size:12px;line-height:1.35;color:#4b5563}
+.head-desc{margin-left:auto;max-width:calc(100% - 150px);font-size:12px;line-height:1.35;color:#4b5563}
 
-/* 운행전 km 배지 / 미세안내 */
+/* 운행전 km / 미세안내 */
 .prevkm{display:inline-flex;align-items:center;gap:6px;background:var(--chip);color:#1e40af;border:1px solid var(--chip-border);padding:4px 10px;border-radius:999px;font-size:12px;font-weight:800;margin-top:6px}
 .micro{margin-top:6px;margin-left:auto;color:#95a1ad;font-size:12px}
 
-/* 히스토리 카드 */
+/* 히스토리 */
 .history{margin:8px 12px 84px;padding:10px;border:1px solid var(--line);border-radius:14px;background:#fff}
 .hitem{display:flex;gap:12px;align-items:flex-start;padding:12px 4px;border-bottom:1px dashed var(--line)}
 .hitem:last-child{border-bottom:none}
@@ -95,11 +94,10 @@ button.primary:active{background:var(--blue-press)}
 .hrow1 .title{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hrow1 .metaR{color:#64748b;font-size:12px;white-space:nowrap}
 .hrow2{color:#374151;font-size:12.5px;line-height:1.3;word-break:keep-all}
-.hrow2 .postkm{font-weight:900;color:#111;margin-right:6px}
 .hrow3{color:#6b7280;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .btn.small{padding:6px 10px;font-size:12px}
 
-/* 테이블/그리드/페이지네이션(운행일지 탭 용) */
+/* 표/탭바/토스트/로딩 */
 .table{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .table th,.table td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}
 .table th{background:#f1f3f5;font-weight:800;color:#333}
@@ -109,13 +107,11 @@ button.primary:active{background:var(--blue-press)}
 .pager button{appearance:none;border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 10px;font-weight:800;cursor:pointer}
 .pager .on{background:#1b64da;color:#fff;border-color:#1b64da}
 
-/* 탭바 */
 .tabbar{position:fixed;left:0;right:0;bottom:0;height:64px;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);z-index:50}
 .tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#6b7684;text-decoration:none;font-size:11px;font-weight:800}
 .tab.on{color:#1b64da}
 .ico{width:20px;height:20px}
 
-/* 토스트 & 로딩 */
 .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#fff;border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.08);padding:10px 12px;border-radius:12px;font-size:14px;display:none}
 .toast.ok{border-color:#b2f2bb;color:#0c7;background:#f6fffa;display:block}
 .toast.err{border-color:#ffc9c9;color:#d11;background:#fff5f5;display:block}
@@ -127,7 +123,7 @@ button.primary:active{background:var(--blue-press)}
 .overlay .msg{font-weight:700;font-size:14px;color:#111}
 .overlay .sub{font-size:12px;color:#6b7684;text-align:center}
 
-/* ===== QR 모달 ===== */
+/* QR 모달 */
 .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.45);z-index:10000}
 .modal.show{display:flex}
 .modal .panel{background:#fff;border-radius:16px;padding:16px 16px 14px;width:min(92vw,380px);box-shadow:0 10px 30px rgba(0,0,0,.18);display:flex;flex-direction:column;gap:12px;align-items:center}
@@ -243,14 +239,19 @@ function renderHome(){
   const p1=ce('p',{className:'caption',textContent:'차량을 선택해 기록하세요.'});
   const grid=ce('div',{className:'list'});
   VEHICLES.forEach(v=>{
-    const a=ce('a',{className:'tile',href:'#/'+encodeURIComponent(v.id)});
+    const tile=ce('a',{className:'tile',href:'#/'+encodeURIComponent(v.id)});
     const img=ce('img',{src:v.img||''});
     img.onerror=function(){const s=this.src;if(/\.png$/i.test(s)) this.src=s.replace(/\.png$/i,'.jpg'); else if(/\.jpg$/i.test(s)) this.src=s.replace(/\.jpg$/i,'.png'); else this.remove();};
     const left=ce('div',{className:'tile-left'});
     left.append(img,ce('span',{className:'plate',textContent:(v.name||'')}));
     const right=ce('span',{className:'idtag',textContent:v.id});
-    a.append(left,right);
-    grid.append(a);
+
+    // HOME용 QR 버튼
+    const qrBtn=ce('button',{className:'qr-mini',type:'button',textContent:'QR'});
+    qrBtn.addEventListener('click',(e)=>{ e.preventDefault(); e.stopPropagation(); openQRForVehicle(v.id, v.name || v.id); });
+
+    tile.append(left,right,qrBtn);
+    grid.append(tile);
   });
   page.append(p1,grid);
 }
@@ -258,9 +259,9 @@ function renderHome(){
 /* ===== 차량 페이지 ===== */
 function renderVehicle(vehicle){
   const v = VEHICLES.find(x=>x.id===vehicle) || {id:vehicle,name:''};
-  const page = el('#page'); page.innerHTML = '';
+  const page = el('#page');
+  page.innerHTML = '';
 
-  // 헤더
   const head = ce('div',{className:'card head-card'});
   const vchip = ce('div',{className:'vchip2'});
   vchip.innerHTML = `
@@ -272,31 +273,24 @@ function renderVehicle(vehicle){
   head.append(vchip, desc);
   page.append(head);
 
-  // 입력 카드
   const card = ce('div',{className:'card'});
 
-  // 성명/부서
   const row = ce('div',{className:'row'});
   const nameSel = ce('select',{id:'userName'});
   nameSel.append(ce('option',{value:'',textContent:'성명 선택'}));
   NAME_ALLOW.forEach(n=>nameSel.append(ce('option',{value:n,textContent:n})));
   const deptSel = ce('select',{id:'dept'});
   deptSel.append(ce('option',{value:'',textContent:'부서 선택'}));
-  DEPT_ALLOW.forEach(d=>deptSel.append(ce('option',{value:d,textContent:d})));
-  row.append(
-    fieldLabelled('성명', nameSel, true),
-    fieldLabelled('부서', deptSel, true)
-  );
+  DEPT_ALLOW.forEach(d=>deptSel.append(ce('option',{value:d,textContent:d)}));
+  row.append(fieldLabelled('성명', nameSel, true), fieldLabelled('부서', deptSel, true));
   card.append(row);
 
-  // 운행 후 / 비고
   const row2 = ce('div',{className:'row'});
   const odoI  = ce('input',{id:'odo',type:'number',inputMode:'numeric',placeholder:'예) 21840'});
   const memoI = ce('textarea',{id:'memo',placeholder:'시설점검 등'});
   row2.append(fieldLabelled('운행 후 km(숫자)', odoI, true), field('비고(선택)', memoI));
   card.append(row2);
 
-  // 운행전 배지 + 미세 안내
   const meta = ce('div',{style:'display:flex;align-items:center;gap:8px'});
   const prevBadge = ce('span',{className:'prevkm',textContent:'운행 전: 확인중…'});
   const micro = ce('div',{className:'micro',textContent:'내 정보는 이 기기에만 저장됩니다.'});
@@ -304,70 +298,44 @@ function renderVehicle(vehicle){
   card.append(meta);
   page.append(card);
 
-  // 액션 (QR 버튼 추가)
   const actions = ce('div',{className:'actions'});
   const backBtn = ce('a',{className:'btn ghost',href:'#/'}); backBtn.textContent='← 홈으로';
   const resetBtn= ce('button',{className:'btn',type:'button'}); resetBtn.textContent='내 정보 초기화';
   const refreshBtn= ce('button',{className:'btn',type:'button'}); refreshBtn.textContent='새로고침';
-  const qrBtn = ce('button',{className:'btn',type:'button'}); qrBtn.textContent='QR 코드';
-  actions.append(backBtn, resetBtn, refreshBtn, qrBtn);
+  actions.append(backBtn, resetBtn, refreshBtn);
   page.append(actions);
 
   const sticky = ce('div',{className:'sticky'});
   const submit = ce('button',{className:'primary',textContent:'제출하기',type:'button'});
   sticky.append(submit); page.append(sticky);
 
-  // 저장값 복원
   const keyN='drive_userName', keyD='drive_dept';
   const savedN=localStorage.getItem(keyN), savedD=localStorage.getItem(keyD);
   if(savedN && NAME_ALLOW.includes(savedN)) nameSel.value=savedN;
   if(savedD && DEPT_ALLOW.includes(savedD)) deptSel.value=savedD;
 
-  resetBtn.onclick=()=>{
-    localStorage.removeItem(keyN); localStorage.removeItem(keyD);
-    nameSel.value=''; deptSel.value='';
-    toast('저장된 이름/부서를 삭제했습니다.');
-  };
+  resetBtn.onclick=()=>{ localStorage.removeItem(keyN); localStorage.removeItem(keyD); nameSel.value=''; deptSel.value=''; toast('저장된 이름/부서를 삭제했습니다.'); };
 
-  // 새로고침 → 두 번 갱신
-  refreshBtn.onclick = ()=>{
-    setLoading(true,'새로고침 중…');
-    refreshAllTwice(vehicle).finally(()=>setLoading(false));
-  };
+  refreshBtn.onclick = ()=>{ setLoading(true,'새로고침 중…'); refreshAllTwice(vehicle).finally(()=>setLoading(false)); };
 
-  // QR 버튼
-  qrBtn.onclick = ()=> openQRForVehicle(vehicle, v.name || vehicle);
-
-  // 제출
   submit.onclick = async () => {
-    const userName = nameSel.value;
-    const dept     = deptSel.value;
-    const odo      = odoI.value.trim();
-    const memo     = memoI.value.trim();
-
+    const userName = nameSel.value, dept = deptSel.value, odo = odoI.value.trim(), memo = memoI.value.trim();
     if(!userName){ toast('성명을 선택해주세요', false); nameSel.focus(); return; }
     if(!dept){     toast('부서를 선택해주세요', false);  deptSel.focus(); return; }
     if(!odo || isNaN(+odo)){ toast('운행 후 km(숫자)를 입력해주세요', false); odoI.focus(); return; }
     if(!NAME_ALLOW.includes(userName)){ toast('성명은 목록에서 선택해주세요.', false); nameSel.focus(); return; }
     if(!DEPT_ALLOW.includes(dept)){     toast('부서는 목록에서 선택해주세요.', false);  deptSel.focus(); return; }
 
-    localStorage.setItem(keyN,userName);
-    localStorage.setItem(keyD,dept);
+    localStorage.setItem(keyN,userName); localStorage.setItem(keyD,dept);
 
     let beforeCount=0;
     await new Promise(res=>fetchCsv(rows=>{
-      beforeCount = rows.filter((r,i)=>i>0 && String(r[1]||'').toUpperCase()===vehicle).length;
-      res();
+      beforeCount = rows.filter((r,i)=>i>0 && String(r[1]||'').toUpperCase()===vehicle).length; res();
     }, true));
 
     setLoading(true,'기록을 저장하는 중입니다…');
-
     try{
-      const resp = await fetch(WEBHOOK_URL,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({vehicle,userName,dept,odo,memo})
-      });
+      const resp = await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body: JSON.stringify({vehicle,userName,dept,odo,memo})});
       if(!resp.ok) throw new Error('네트워크 오류');
 
       const ok = await waitUntilUpdated(vehicle,beforeCount,15000);
@@ -376,17 +344,12 @@ function renderVehicle(vehicle){
       await refreshAllTwice(vehicle);
 
       toast(ok ? '전송 완료! ✅' : '전송은 완료, 반영 대기 중입니다.', ok);
-    }catch(e){
-      toast('전송 실패: '+e.message, false);
-    }finally{
-      setLoading(false);
-    }
+    }catch(e){ toast('전송 실패: '+e.message, false); }
+    finally{ setLoading(false); }
   };
 
-  // 초기 표기
   refreshAllOnce(vehicle);
 
-  // 최근 기록 카드
   const histCard=ce('div',{className:'history'});
   histCard.append(ce('div',{className:'section-title',textContent:'최근 기록'}));
   histCard.append(ce('div',{id:'histBody'}));
@@ -404,8 +367,7 @@ function renderSheetTab(){
   const grid=ce('div',{className:'grid'});
   VEHICLES.forEach(v=>{
     const a=ce('a',{className:'mini',href:'#',onclick:e=>{e.preventDefault();openSheetView(v.id,v.name);}});
-    a.textContent=`${v.name} (${v.id})`;
-    grid.append(a);
+    a.textContent=`${v.name} (${v.id})`; grid.append(a);
   });
   page.append(grid,ce('div',{id:'sheetView',className:'card'}));
 }
@@ -420,8 +382,7 @@ function openSheetView(vehicle,vname){
     body.forEach(r=>{
       const date=fmtDateSmart(r[0]||''), dept=r[8]||'', name=r[4]||'', post=Number(r[5]||0), day=Number(r[6]||0), memo=r[7]||'';
       const pre=(Number.isFinite(post)&&Number.isFinite(day))?(post-day):'';
-      const tr=ce('tr');
-      tr.innerHTML=`<td>${date}</td><td>${dept}</td><td>${name}</td><td>${pre}</td><td>${post}</td><td>${day}</td><td>${memo}</td>`;
+      const tr=ce('tr'); tr.innerHTML=`<td>${date}</td><td>${dept}</td><td>${name}</td><td>${pre}</td><td>${post}</td><td>${day}</td><td>${memo}</td>`;
       tb.append(tr);
     });
     host.append(table);
@@ -447,9 +408,7 @@ function renderRecentTab(){
         const vid   = r[1]||'';
         const vname = (VEHICLES.find(v=>v.id===vid)?.name) || vid;
         const name  = r[4]||'', dept=r[8]||'';
-        const post  = Number(r[5]||0);
-        const day   = Number(r[6]||0);
-        const memo  = r[7]||'';
+        const post  = Number(r[5]||0), day=Number(r[6]||0), memo=r[7]||'';
         return `
           <div class="hitem">
             <div class="kmcircle">${Number.isFinite(day)&&day>0 ? `${day}km` : '—'}</div>
@@ -466,10 +425,8 @@ function renderRecentTab(){
 
       pager.innerHTML='';
       for(let i=1;i<=maxPages;i++){
-        const b=ce('button',{textContent:String(i)});
-        if(i===cur) b.className='on';
-        b.onclick=()=>{cur=i;draw();};
-        pager.append(b);
+        const b=ce('button',{textContent:String(i)}); if(i===cur) b.className='on';
+        b.onclick=()=>{cur=i;draw();}; pager.append(b);
       }
     }
     draw();
@@ -486,11 +443,8 @@ function loadHistory(vehicle,force){
       .filter((r,i)=> i>0 && String(r[1]||'').trim().toUpperCase()===vehicle)
       .slice(-30).reverse()
       .map(r=>{
-        const date = fmtDateSmart(r[0]||'');
-        const name = r[4]||'', dept=r[8]||'';
-        const post = Number(r[5]||0);
-        const day  = Number(r[6]||0);
-        const memo = r[7]||'';
+        const date = fmtDateSmart(r[0]||''), name = r[4]||'', dept=r[8]||'';
+        const post = Number(r[5]||0), day  = Number(r[6]||0), memo = r[7]||'';
         const tsRaw = r[0] || '';
         return `
           <div class="hitem">
@@ -544,7 +498,7 @@ function showContacts(){
   }).catch(()=>toast('불러오기 실패',false));
 }
 
-/* ===== 삭제 버튼 위임 ===== */
+/* ===== 삭제 ===== */
 document.addEventListener('click', (e) => {
   const b = e.target.closest('button[data-action="delete"]');
   if (!b) return;
@@ -565,7 +519,7 @@ async function deleteAndRefresh(ts, vehicle, btn){
   finally{ btn && (btn.disabled=false); }
 }
 
-/* ===== 강력 갱신(운행전 km + 최근기록) ===== */
+/* ===== 강력 갱신 ===== */
 async function refreshAllOnce(vehicle){
   await new Promise(res=>{
     fetchCsv(rows=>{
@@ -579,9 +533,7 @@ async function refreshAllOnce(vehicle){
         const post=Number(last[5]||''), day=Number(last[6]||'');
         const pre=(Number.isFinite(post)&&Number.isFinite(day))?(post-day):NaN;
         badge && (badge.textContent = Number.isFinite(pre) ? `운행 전: ${pre} km` : '운행 전: —');
-      }else{
-        badge && (badge.textContent='운행 전: (첫 기록)');
-      }
+      }else{ badge && (badge.textContent='운행 전: (첫 기록)'); }
       res();
     }, true);
   });
@@ -605,8 +557,6 @@ function waitUntilUpdated(vehicle,beforeCount,timeoutMs=12000){
     tick();
   });
 }
-
-/* ===== 공통 리프레시 ===== */
 function refreshAfterChange(vehicle){
   if(vehicle) loadHistory(vehicle,true);
   if(location.hash==='#recent') renderRecentTab();
@@ -633,7 +583,7 @@ function fmtDateSmart(s){
 }
 function ymdhm(d){ const yoil=['일','월','화','수','목','금','토'][d.getDay()]; const pad=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())}(${yoil}) ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
 
-/* ===== 10초 자동 새로고침(최근/차량) ===== */
+/* ===== 자동 새로고침(최근/차량) ===== */
 let _pollTimer = null;
 let _lastStamp = '';
 function calcStamp(rows, vehicle){
@@ -670,8 +620,6 @@ function startPolling(key){
   }, 10000);
 }
 function stopPolling(){ if (_pollTimer){ clearInterval(_pollTimer); _pollTimer=null; } }
-
-// 라우트 변경에 맞춰 폴링 키 전환
 const _origRoute = route;
 window.removeEventListener('hashchange', route);
 window.addEventListener('hashchange', ()=>{
@@ -683,7 +631,6 @@ window.addEventListener('hashchange', ()=>{
   if (first==='sheet' || first==='more'){ stopPolling(); return; }
   startPolling('VEH:'+first.toUpperCase());
 });
-// 초기 진입 시 폴링 상태도 맞춤
 (function initPollOnLoad(){
   const seg = (location.hash||'#/').slice(2).split('/').filter(Boolean);
   const first = seg[0]||'';
@@ -691,7 +638,7 @@ window.addEventListener('hashchange', ()=>{
   else if (first && !['sheet','more'].includes(first)){ startPolling('VEH:'+first.toUpperCase()); }
 })();
 
-/* ===== QR 코드 기능 ===== */
+/* ===== QR 코드 기능 (HOME 전용 버튼에서 호출) ===== */
 function openQRForVehicle(vehicle, vname){
   const modal = el('#qrModal');
   const canvas = el('#qrCanvas');
@@ -704,21 +651,17 @@ function openQRForVehicle(vehicle, vname){
 
   title.textContent = `${vname} (${vehicle}) 페이지 QR`;
 
-  // 캔버스 생성
   QRCode.toCanvas(canvas, url, {width:256, margin:1}, (err)=>{
     if(err){ toast('QR 생성 실패', false); return; }
     modal.classList.add('show');
   });
 
-  // 다운로드
   downloadBtn.onclick = ()=>{
     const link = document.createElement('a');
     link.download = `QR_${vehicle}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
   };
-
-  // 닫기
   const close = ()=> modal.classList.remove('show');
   closeBtn.onclick = close;
   modal.onclick = (e)=>{ if(e.target===modal) close(); };
