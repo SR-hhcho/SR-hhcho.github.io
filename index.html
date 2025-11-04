@@ -6,14 +6,14 @@
 <meta name="theme-color" content="#1b64da" />
 <title>업무용 운행기록</title>
 
-<!-- 폰트: 안정적 경로 + 버전 고정 -->
+<!-- 안전한 Pretendard 경로(버전 고정) -->
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet"
       href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css"
       crossorigin>
 
-<!-- 파비콘: 불필요한 작은따옴표 제거 -->
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'><rect width='128' height='128' rx='24' fill='%231b64da'/><text x='50%' y='58%' text-anchor='middle' dominant-baseline='middle' font-family='Arial' font-size='84' fill='white'>차</text></svg>">
+<!-- 파비콘(내장) -->
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'><rect width='128' height='128' rx='24' fill='%231b64da'/><text x='50%' y='58%' text-anchor='middle' dominant-baseline='middle' font-family='Arial' font-size='84' fill='white'>차</text></svg>'>
 
 <style>
 :root{
@@ -27,10 +27,9 @@ body{
   margin:0;background:var(--bg);color:var(--text);
   font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",Segoe UI,Roboto,Helvetica,Arial,system-ui,sans-serif;
 }
-a{color:inherit;text-decoration:none} /* 링크 밑줄 제거 */
 .wrap{min-height:100%;display:flex;flex-direction:column}
 
-/* 아바타(홈 타일 썸네일) */
+/* 아바타(홈 썸네일) */
 .avatar{width:36px;height:36px;border-radius:8px;object-fit:cover;border:1px solid var(--line)} 
 
 /* 앱바 */
@@ -50,7 +49,7 @@ a{color:inherit;text-decoration:none} /* 링크 밑줄 제거 */
 .card{background:#fff;margin:8px 12px;padding:14px;border-radius:14px;box-shadow:0 6px 24px rgba(17,17,17,.06)}
 .row{display:flex;gap:8px}
 label{display:block;font-size:12px;color:var(--sub);margin:8px 2px 4px}
-label.req::after{content:" *";color:#1b64da;font-weight:900}  /* ⬅️ 필수표시 */
+label.req::after{content:" *";color:#1b64da;font-weight:900}  /* 필수표시 */
 input,textarea,select{
   width:100%;font-size:16px;padding:12px 12px;border-radius:12px;border:1px solid var(--line);
   background:#fff;outline:none;transition:border .15s,box-shadow .15s;font-family:inherit
@@ -87,7 +86,7 @@ button.primary:active{background:var(--blue-press)}
 .hitem{display:flex;gap:12px;align-items:flex-start;padding:12px 4px;border-bottom:1px dashed var(--line)}
 .hitem:last-child{border-bottom:none}
 
-/* 왼쪽 동그란 km 뱃지 */
+/* 왼쪽 원형 km 뱃지 */
 .kmcircle{
   min-width:48px;min-height:48px;border-radius:50%;
   background:#eef2ff;border:1.5px solid #c7d2fe;color:#1e40af;
@@ -107,38 +106,28 @@ button.primary:active{background:var(--blue-press)}
 /* 삭제 버튼 작게 */
 .btn.small{padding:6px 10px;font-size:12px}
 
-/* ===== 차량 헤더(왼쪽 배지 2줄 + 오른쪽 설명 2줄) ===== */
+/* ===== 차량 헤더(2줄 뱃지 + 오른쪽 설명 2줄) ===== */
 .head-card{display:flex;gap:12px;align-items:center}
 .vchip2{
-  width:70px;height:70px;border-radius:16px;
+  width:66px;height:66px;border-radius:16px;
   background:var(--chip);border:1px solid var(--chip-border);
   color:#1e40af;display:flex;flex-direction:column;justify-content:center;align-items:center;
   line-height:1.05;font-weight:900;box-shadow:0 4px 12px rgba(0,0,0,.04);text-align:center;padding:4px
 }
-.vchip2 .plate{font-size:13px;max-width:62px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vchip2 .vid{font-size:10.5px;opacity:.85}
+.vchip2 .plate{font-size:12.5px;max-width:58px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vchip2 .vid{font-size:10px;opacity:.85}
 
-/* 오른쪽 설명: 2줄, 작은 폰트 */
+/* 오른쪽 설명: 2줄 */
 .head-desc{
-  margin-left:auto;max-width:calc(100% - 88px);
+  margin-left:auto;max-width:calc(100% - 84px);
   font-size:12px;line-height:1.35;color:#4b5563
 }
-
-/* 운행일지/최근에 쓰는 그리드/테이블/페이지네이션 스타일 복구 */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin:8px 12px 84px}
-.mini{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;text-decoration:none;color:#111;font-weight:800}
-.table{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
-.table th,.table td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}
-.table th{background:#f1f3f5;font-weight:800;color:#333}
-.pager{display:flex;gap:8px;justify-content:center;margin:10px 0 84px}
-.pager button{appearance:none;border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 10px;font-weight:800;cursor:pointer}
-.pager .on{background:#1b64da;color:#fff;border-color:#1b64da}
 
 /* 하단 탭바 */
 .tabbar{position:fixed;left:0;right:0;bottom:0;height:64px;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);z-index:50}
 .tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#6b7684;text-decoration:none;font-size:11px;font-weight:800}
 .tab.on{color:#1b64da}
-.ico{width:20px;height:20px} /* 아이콘 안전장치 */
+.ico{width:20px;height:20px}
 
 /* 토스트 */
 .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#fff;border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.08);padding:10px 12px;border-radius:12px;font-size:14px;display:none}
@@ -158,11 +147,7 @@ button.primary:active{background:var(--blue-press)}
 <body>
 <div class="wrap">
   <div class="appbar">
-    <a class="appbtn" href="#/">
-      <svg class="ico" viewBox="0 0 24 24" width="20" height="20">
-        <path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" fill="currentColor"/>
-      </svg>
-    </a>
+    <a class="appbtn" href="#/"><svg class="ico" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" fill="currentColor"/></svg></a>
     <div class="apptitle"><a href="#/">업무용 운행기록</a></div>
     <div></div>
   </div>
@@ -182,18 +167,10 @@ button.primary:active{background:var(--blue-press)}
 
 <!-- 하단 탭 -->
 <nav class="tabbar">
-  <a href="#/" class="tab" id="tab-home">
-    <svg class="ico" viewBox="0 0 24 24" width="20" height="20"><path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" fill="currentColor"/></svg>HOME
-  </a>
-  <a href="#/sheet" class="tab" id="tab-sheet">
-    <svg class="ico" viewBox="0 0 24 24" width="20" height="20"><path d="M5 3h10l4 4v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm10 1v4h4" fill="currentColor"/></svg>운행일지
-  </a>
-  <a href="#/recent" class="tab" id="tab-recent">
-    <svg class="ico" viewBox="0 0 24 24" width="20" height="20"><path d="M12 8v5l4 2M4 12a8 8 0 1 0 8-8" stroke="currentColor" fill="none" stroke-width="2"/></svg>최근기록
-  </a>
-  <a href="#/more" class="tab" id="tab-more">
-    <svg class="ico" viewBox="0 0 24 24" width="20" height="20"><circle cx="5" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="12" r="2" fill="currentColor"/></svg>더보기
-  </a>
+  <a href="#/" class="tab" id="tab-home"><svg class="ico" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" fill="currentColor"/></svg>HOME</a>
+  <a href="#/sheet" class="tab" id="tab-sheet"><svg class="ico" viewBox="0 0 24 24"><path d="M5 3h10l4 4v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm10 1v4h4" fill="currentColor"/></svg>운행일지</a>
+  <a href="#/recent" class="tab" id="tab-recent"><svg class="ico" viewBox="0 0 24 24"><path d="M12 8v5l4 2M4 12a8 8 0 1 0 8-8" stroke="currentColor" fill="none" stroke-width="2"/></svg>최근기록</a>
+  <a href="#/more" class="tab" id="tab-more"><svg class="ico" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="12" r="2" fill="currentColor"/></svg>더보기</a>
 </nav>
 
 <script>
@@ -351,16 +328,52 @@ function renderVehicle(vehicle){
     toast('저장된 이름/부서를 삭제했습니다.');
   };
 
-  // 새로고침 버튼
-  refreshBtn.onclick=()=>{
-    setLoading(true,'새로고침 중…');
-    refreshPrev(true);
-    loadHistory(vehicle,true);
-    setTimeout(()=>setLoading(false),400);
-  };
+  // === 숫자 파서 & 최근/이전행 헬퍼 ===
+  function toNum(v){
+    if (v == null) return NaN;
+    const n = String(v).replace(/[^\d.-]/g,'');
+    const x = Number(n);
+    return Number.isFinite(x) ? x : NaN;
+  }
+  function getLastAndPrev(rows, vehicle){
+    let last = null, prev = null;
+    for (let i = rows.length - 1; i >= 1; i--){
+      const r = rows[i];
+      if (String(r[1]||'').trim().toUpperCase() === vehicle){
+        if (!last) last = r;
+        else { prev = r; break; }
+      }
+    }
+    return { last, prev };
+  }
 
-  // 모바일에서 km 포커스 시 스크롤
-  odoI.addEventListener('focus',()=>setTimeout(()=>odoI.scrollIntoView({behavior:'smooth',block:'center'}),150));
+  // === 운행 전 km 계산: (1) 최근행 post-day, (2) 이전행 post ===
+  async function refreshPrev(force){
+    return new Promise(res=>{
+      fetchCsv(rows=>{
+        const { last, prev } = getLastAndPrev(rows, vehicle);
+        if (!last){
+          prevBadge.textContent = '운행 전: (첫 기록)';
+          return res();
+        }
+        const post = toNum(last[5]); // 주행후
+        const day  = toNum(last[6]); // 일운행
+        let pre = NaN;
+
+        if (Number.isFinite(post) && Number.isFinite(day) && day > 0){
+          pre = post - day;
+        }else{
+          const prevPost = prev ? toNum(prev[5]) : NaN;
+          if (Number.isFinite(prevPost)) pre = prevPost;
+          else if (Number.isFinite(post) && Number.isFinite(day)) pre = post - day; // 최후 fallback
+        }
+        prevBadge.textContent = Number.isFinite(pre) ? `운행 전: ${pre} km` : '운행 전: —';
+        res();
+      }, force);
+    });
+  }
+  // 최초 1회
+  refreshPrev();
 
   // 제출
   submit.onclick = async () => {
@@ -395,16 +408,16 @@ function renderVehicle(vehicle){
       });
       if(!resp.ok) throw new Error('네트워크 오류');
 
-      // 시트 반영 대기(최대 15초). true/false 상관없이 UI는 갱신 시도
+      // 시트 반영 대기(최대 15초)
       const ok = await waitUntilUpdated(vehicle,beforeCount,15000);
 
-      // 입력창 초기화 & 반영 시도
+      // 입력창 초기화
       odoI.value=''; memoI.value=''; odoI.focus();
+
+      // ⬇️ 즉시 갱신 + 1초 후 재갱신 (홈 갔다오기 효과)
       await refreshPrev(true);
       loadHistory(vehicle,true);
-
-      // 1.2초 후 한 번 더(딜레이 반영 대비)
-      setTimeout(()=>{ refreshPrev(true); loadHistory(vehicle,true); },1200);
+      setTimeout(()=>{ refreshPrev(true); loadHistory(vehicle,true); },1000);
 
       toast(ok ? '전송 완료! ✅' : '전송은 완료, 반영 대기 중입니다.', ok);
     }catch(e){
@@ -414,28 +427,17 @@ function renderVehicle(vehicle){
     }
   };
 
-  // 운행 전 km 표시(해당 차량의 "가장 최신" 행 기준: 맨 끝에서부터 최초 매칭)
-  async function refreshPrev(force){
-    return new Promise(res=>{
-      fetchCsv(rows=>{
-        let last=null;
-        for(let i=rows.length-1;i>=1;i--){
-          const r=rows[i];
-          if(String(r[1]||'').toUpperCase()===vehicle){ last=r; break; }
-        }
-        if(last){
-          const post=Number(last[5]||''); // 주행후
-          const day =Number(last[6]||''); // 일운행
-          const pre=(Number.isFinite(post)&&Number.isFinite(day))?(post-day):NaN;
-          prevBadge.textContent = Number.isFinite(pre)? `운행 전: ${pre} km` : '운행 전: —';
-        }else{
-          prevBadge.textContent='운행 전: (첫 기록)';
-        }
-        res();
-      }, force);
-    });
-  }
-  refreshPrev();
+  // 새로고침 버튼도 동일한 “두 번 갱신”
+  refreshBtn.onclick=()=>{
+    setLoading(true,'새로고침 중…');
+    refreshPrev(true);
+    loadHistory(vehicle,true);
+    setTimeout(()=>{
+      refreshPrev(true);
+      loadHistory(vehicle,true);
+      setLoading(false);
+    },1000);
+  };
 
   // 차량별 최근 기록 카드 (3줄 구성)
   const histCard=ce('div',{className:'history'});
@@ -514,7 +516,7 @@ function renderRecentTab(){
               <div class="hrow3">${date}</div>
             </div>
           </div>`;
-      }).join('') || '<div class="hmeta">기록이 없습니다.</div>';
+      }).join('') || '<div class="item meta">기록이 없습니다.</div>';
 
       pager.innerHTML='';
       for(let i=1;i<=maxPages;i++){
@@ -577,7 +579,7 @@ function renderMoreTab(){
   const grid=ce('div',{style:'display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:8px 12px 84px'});
   function tile(label,icon,onclick){
     const b=ce('button',{className:'btn',style:'height:84px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px',onclick});
-    b.innerHTML=`<svg class="ico" viewBox="0 0 24 24" width="20" height="20">${icon}</svg><div style="font-size:12px;font-weight:800;white-space:nowrap">${label}</div>`;
+    b.innerHTML=`<svg class="ico" viewBox="0 0 24 24">${icon}</svg><div style="font-size:12px;font-weight:800;white-space:nowrap">${label}</div>`;
     return b;
   }
   grid.append(
@@ -597,7 +599,7 @@ function showContacts(){
   }).catch(()=>toast('불러오기 실패',false));
 }
 
-/* ===== 공통: 반영 대기 폴링 ===== */
+/* ===== 반영 대기 폴링 ===== */
 function waitUntilUpdated(vehicle,beforeCount,timeoutMs=12000){
   const started=Date.now();
   return new Promise((resolve)=>{
@@ -617,7 +619,7 @@ function refreshAfterChange(vehicle){
   if(location.hash==='#recent') renderRecentTab();
 }
 
-/* ===== 날짜 파서(시리얼/국문/ISO 모두) ===== */
+/* ===== 날짜 파서 ===== */
 function fmtDateSmart(s){
   if(s instanceof Date && !isNaN(s)) return ymdhm(s);
   if(/^\d+(\.\d+)?$/.test(String(s))){
@@ -654,7 +656,7 @@ async function deleteAndRefresh(ts, vehicle, btn){
     const r=await fetch(DELETE_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ts,vehicle})});
     if(!r.ok) throw new Error('삭제 실패');
     toast('삭제 완료');
-    setTimeout(()=>refreshAfterChange(vehicle),700);
+    setTimeout(()=>{ refreshAfterChange(vehicle); refreshPrev(true); },700);
   }catch(e){ toast('삭제 오류: '+e.message,false); }
   finally{ btn && (btn.disabled=false); }
 }
@@ -681,15 +683,13 @@ function startPolling(key){
   stopPolling();
   const isVehicle = key && key.startsWith('VEH:');
   const vehicle = isVehicle ? key.slice(4) : null;
-
   fetchCsv(rows=>{ _lastStamp = calcStamp(rows, vehicle); }, true);
-
   _pollTimer = setInterval(()=>{
     fetchCsv(rows=>{
       const now = calcStamp(rows, vehicle);
       if (now && now !== _lastStamp){
         _lastStamp = now;
-        if (isVehicle){ refreshAfterChange(vehicle); }
+        if (isVehicle){ refreshAfterChange(vehicle); refreshPrev(true); }
         else { if (location.hash === '#recent') renderRecentTab(); }
       }
     }, true);
