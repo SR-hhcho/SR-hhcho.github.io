@@ -12,6 +12,9 @@
       href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css"
       crossorigin>
 
+<!-- QR 코드 생성 라이브러리 (경량, 캔버스 출력) -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+
 <style>
 :root{
   --bg:#f7f8fa; --card:#fff; --text:#111; --sub:#717680; --line:#e5e8eb;
@@ -39,7 +42,7 @@ body{
 
 /* 카드/폼 */
 .card{background:#fff;margin:8px 12px;padding:14px;border-radius:14px;box-shadow:0 6px 24px rgba(17,17,17,.06)}
-.row{display:flex;gap:8px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
 label{display:block;font-size:12px;color:var(--sub);margin:8px 2px 4px}
 label.req::after{content:" *";color:#1b64da;font-weight:900}
 input,textarea,select{
@@ -66,17 +69,17 @@ button.primary:active{background:var(--blue-press)}
 .plate{font-weight:900;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60vw}
 .idtag{font-size:11px;font-weight:800;color:#1e40af;background:#eef2ff;padding:2px 8px;border-radius:999px;border:1px solid #dbe6ff;white-space:nowrap}
 
-/* 차량 헤더 */
+/* 차량 헤더 — 폰트 줄이고 박스 약간 키움 */
 .head-card{display:flex;gap:12px;align-items:center}
 .vchip2{
-  width:66px;height:66px;border-radius:14px;
+  width:72px;height:72px;border-radius:14px;
   background:var(--chip);border:1px solid var(--chip-border);
   color:#1e40af;display:flex;flex-direction:column;justify-content:center;align-items:center;
-  line-height:1.05;font-weight:900;box-shadow:0 4px 12px rgba(0,0,0,.04);text-align:center;padding:3px
+  line-height:1.05;font-weight:900;box-shadow:0 4px 12px rgba(0,0,0,.04);text-align:center;padding:4px
 }
-.vchip2 .plate{font-size:12.5px;max-width:58px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vchip2 .vid{font-size:10px;opacity:.85}
-.head-desc{margin-left:auto;max-width:calc(100% - 88px);font-size:12px;line-height:1.35;color:#4b5563}
+.vchip2 .plate{font-size:12px;max-width:64px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vchip2 .vid{font-size:10px;opacity:.9}
+.head-desc{margin-left:auto;max-width:calc(100% - 100px);font-size:12px;line-height:1.35;color:#4b5563}
 
 /* 운행전 km 배지 / 미세안내 */
 .prevkm{display:inline-flex;align-items:center;gap:6px;background:var(--chip);color:#1e40af;border:1px solid var(--chip-border);padding:4px 10px;border-radius:999px;font-size:12px;font-weight:800;margin-top:6px}
@@ -123,6 +126,15 @@ button.primary:active{background:var(--blue-press)}
 @keyframes spin{to{transform:rotate(360deg)}}
 .overlay .msg{font-weight:700;font-size:14px;color:#111}
 .overlay .sub{font-size:12px;color:#6b7684;text-align:center}
+
+/* ===== QR 모달 ===== */
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.45);z-index:10000}
+.modal.show{display:flex}
+.modal .panel{background:#fff;border-radius:16px;padding:16px 16px 14px;width:min(92vw,380px);box-shadow:0 10px 30px rgba(0,0,0,.18);display:flex;flex-direction:column;gap:12px;align-items:center}
+.modal .panel h3{margin:0;font-size:16px;font-weight:900}
+.modal .qr{width:256px;height:256px;border-radius:12px;border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;background:#fff}
+.modal .row{display:flex;gap:8px}
+.modal .row .btn{padding:10px 12px}
 </style>
 </head>
 <body>
@@ -153,6 +165,18 @@ button.primary:active{background:var(--blue-press)}
   <a href="#/recent" class="tab" id="tab-recent"><svg class="ico" viewBox="0 0 24 24"><path d="M12 8v5l4 2M4 12a8 8 0 1 0 8-8" stroke="currentColor" fill="none" stroke-width="2"/></svg>최근기록</a>
   <a href="#/more" class="tab" id="tab-more"><svg class="ico" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="12" r="2" fill="currentColor"/></svg>더보기</a>
 </nav>
+
+<!-- QR 모달 -->
+<div id="qrModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="qrTitle">
+  <div class="panel">
+    <h3 id="qrTitle">차량 페이지 QR</h3>
+    <div class="qr"><canvas id="qrCanvas" width="256" height="256"></canvas></div>
+    <div class="row">
+      <button class="btn" id="qrDownload">다운로드</button>
+      <button class="btn" id="qrClose">닫기</button>
+    </div>
+  </div>
+</div>
 
 <script>
 /* ===== 설정 ===== */
@@ -280,12 +304,13 @@ function renderVehicle(vehicle){
   card.append(meta);
   page.append(card);
 
-  // 액션
+  // 액션 (QR 버튼 추가)
   const actions = ce('div',{className:'actions'});
   const backBtn = ce('a',{className:'btn ghost',href:'#/'}); backBtn.textContent='← 홈으로';
   const resetBtn= ce('button',{className:'btn',type:'button'}); resetBtn.textContent='내 정보 초기화';
   const refreshBtn= ce('button',{className:'btn',type:'button'}); refreshBtn.textContent='새로고침';
-  actions.append(backBtn, resetBtn, refreshBtn);
+  const qrBtn = ce('button',{className:'btn',type:'button'}); qrBtn.textContent='QR 코드';
+  actions.append(backBtn, resetBtn, refreshBtn, qrBtn);
   page.append(actions);
 
   const sticky = ce('div',{className:'sticky'});
@@ -298,18 +323,20 @@ function renderVehicle(vehicle){
   if(savedN && NAME_ALLOW.includes(savedN)) nameSel.value=savedN;
   if(savedD && DEPT_ALLOW.includes(savedD)) deptSel.value=savedD;
 
-  // 초기화 버튼
   resetBtn.onclick=()=>{
     localStorage.removeItem(keyN); localStorage.removeItem(keyD);
     nameSel.value=''; deptSel.value='';
     toast('저장된 이름/부서를 삭제했습니다.');
   };
 
-  // 새로고침 버튼 → 두 번 갱신
+  // 새로고침 → 두 번 갱신
   refreshBtn.onclick = ()=>{
     setLoading(true,'새로고침 중…');
     refreshAllTwice(vehicle).finally(()=>setLoading(false));
   };
+
+  // QR 버튼
+  qrBtn.onclick = ()=> openQRForVehicle(vehicle, v.name || vehicle);
 
   // 제출
   submit.onclick = async () => {
@@ -327,7 +354,6 @@ function renderVehicle(vehicle){
     localStorage.setItem(keyN,userName);
     localStorage.setItem(keyD,dept);
 
-    // 전송 전 기존 건수(해당 차량만)
     let beforeCount=0;
     await new Promise(res=>fetchCsv(rows=>{
       beforeCount = rows.filter((r,i)=>i>0 && String(r[1]||'').toUpperCase()===vehicle).length;
@@ -346,10 +372,7 @@ function renderVehicle(vehicle){
 
       const ok = await waitUntilUpdated(vehicle,beforeCount,15000);
 
-      // 입력창 초기화
       odoI.value=''; memoI.value=''; odoI.focus();
-
-      // 확실한 갱신(두 번)
       await refreshAllTwice(vehicle);
 
       toast(ok ? '전송 완료! ✅' : '전송은 완료, 반영 대기 중입니다.', ok);
@@ -370,7 +393,6 @@ function renderVehicle(vehicle){
   page.insertBefore(histCard, sticky);
   loadHistory(vehicle);
 
-  // 이 화면에 들어오면 폴링 시작
   startPolling('VEH:'+vehicle);
 }
 
@@ -668,6 +690,39 @@ window.addEventListener('hashchange', ()=>{
   if (first==='recent'){ startPolling('RECENT'); }
   else if (first && !['sheet','more'].includes(first)){ startPolling('VEH:'+first.toUpperCase()); }
 })();
+
+/* ===== QR 코드 기능 ===== */
+function openQRForVehicle(vehicle, vname){
+  const modal = el('#qrModal');
+  const canvas = el('#qrCanvas');
+  const title = el('#qrTitle');
+  const downloadBtn = el('#qrDownload');
+  const closeBtn = el('#qrClose');
+
+  const base = location.origin + location.pathname.replace(/index\.html?$/,'');
+  const url = `${base}#/${encodeURIComponent(vehicle)}`;
+
+  title.textContent = `${vname} (${vehicle}) 페이지 QR`;
+
+  // 캔버스 생성
+  QRCode.toCanvas(canvas, url, {width:256, margin:1}, (err)=>{
+    if(err){ toast('QR 생성 실패', false); return; }
+    modal.classList.add('show');
+  });
+
+  // 다운로드
+  downloadBtn.onclick = ()=>{
+    const link = document.createElement('a');
+    link.download = `QR_${vehicle}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  };
+
+  // 닫기
+  const close = ()=> modal.classList.remove('show');
+  closeBtn.onclick = close;
+  modal.onclick = (e)=>{ if(e.target===modal) close(); };
+}
 </script>
 </body>
 </html>
