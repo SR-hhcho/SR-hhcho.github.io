@@ -32,7 +32,7 @@ body{
 .apptitle{justify-self:center;font-weight:900;font-size:17px;letter-spacing:-0.3px}
 .apptitle a{color:inherit;text-decoration:none}
 
-/* 캡션 */
+/* 캡션/섹션 */
 .section-title{margin:10px 16px 4px;font-weight:900;color:#1b64da;font-size:13px}
 .caption{color:var(--sub);font-size:13px;margin:6px 16px 8px}
 
@@ -87,25 +87,24 @@ button.primary:active{background:var(--blue-press)}
 .kmcircle{min-width:48px;min-height:48px;border-radius:50%;background:#eef2ff;border:1.5px solid #c7d2fe;color:#1e40af;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;box-shadow:0 4px 12px rgba(59,130,246,.08)}
 .hcell{flex:1;min-width:0}
 .hrow1{display:flex;justify-content:space-between;gap:8px}
-.hrow1 .title{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hrow1 .title{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px} /* 1p 축소 */
 .hrow1 .metaR{color:#64748b;font-size:12px;white-space:nowrap}
 .hrow2{color:#374151;font-size:12.5px;line-height:1.3;word-break:keep-all}
 .hrow3{color:#6b7280;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-/* 차량 헤더 배지: 더 좁고 얕게 */
-.head-card{display:flex;gap:12px;align-items:center}
+/* 차량 헤더 배지(더 작게) */
+.head-card{display:flex;gap:10px;align-items:center}
 .vchip2{
-  width:128px; height:56px; border-radius:14px;
-  background:var(--chip); border:1px solid var(--chip-border); color:#1e40af;
-  display:flex; flex-direction:column; justify-content:center; align-items:center;
-  line-height:1.05; font-weight:900; box-shadow:0 4px 12px rgba(0,0,0,.04); text-align:center; padding:4px 8px
+  width:110px;height:52px;border-radius:12px;
+  background:var(--chip);border:1px solid var(--chip-border);color:#1e40af;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  line-height:1.05;font-weight:900;box-shadow:0 4px 12px rgba(0,0,0,.04);text-align:center;padding:4px 6px
 }
-.vchip2 .plate{font-size:15px;max-width:116px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vchip2 .vid{font-size:11px;opacity:.85}
+.vchip2 .plate{font-size:14px;max-width:98px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vchip2 .vid{font-size:10px;opacity:.85}
 .head-desc{
-  margin-left:auto;
-  max-width:calc(100% - 146px); /* 배지 폭+간격 */
-  font-size:12px; line-height:1.35; color:#4b5563
+  margin-left:auto;max-width:calc(100% - 126px);
+  font-size:11px;line-height:1.35;color:#4b5563   /* 1p 축소 */
 }
 
 /* 하단 탭바 */
@@ -135,6 +134,14 @@ button.primary:active{background:var(--blue-press)}
 .modal h3{margin:6px 0 10px;font-size:15px}
 .modal .row{display:flex;gap:8px;margin-top:10px}
 .modal .row .btn{flex:1;justify-content:center}
+
+/* 모바일 전용 차단 오버레이 */
+.deskblock{position:fixed;inset:0;background:#fff;display:none;align-items:center;justify-content:center;z-index:100000}
+.deskblock.show{display:flex}
+.deskblock .inner{max-width:520px;margin:0 16px;text-align:center}
+.deskblock h2{font-size:20px;margin:0 0 8px}
+.deskblock p{font-size:14px;color:#475569;line-height:1.5}
+.deskblock .note{margin-top:12px;font-size:12px;color:#64748b}
 </style>
 </head>
 <body>
@@ -166,7 +173,7 @@ button.primary:active{background:var(--blue-press)}
   <a href="#/more" class="tab" id="tab-more"><svg class="ico" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="12" r="2" fill="currentColor"/></svg>더보기</a>
 </nav>
 
-<!-- qrcode 라이브러리(있으면 사용, 없어도 동작하게 만들었음) -->
+<!-- qrcode 라이브러리(1차 시도용) -->
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 
 <!-- QR 모달 -->
@@ -177,12 +184,33 @@ button.primary:active{background:var(--blue-press)}
     <img id="qrImg" alt="QR" style="display:none;width:256px;height:256px"/>
     <div class="row" style="margin-top:14px">
       <button class="btn" id="qrDownload" type="button">다운로드</button>
+      <button class="btn" id="qrShare" type="button">공유</button>
       <button class="btn" id="qrClose" type="button">닫기</button>
     </div>
   </div>
 </div>
 
+<!-- 데스크톱 차단 -->
+<div id="deskblock" class="deskblock" aria-hidden="true">
+  <div class="inner">
+    <h2>모바일 전용 페이지입니다</h2>
+    <p>이 페이지는 휴대폰에서만 사용 가능합니다. 휴대폰으로 접속해주세요.</p>
+    <p class="note">관리자 확인이 필요하면 주소에 <code>?desk=1</code> 을 붙여 우회할 수 있습니다.</p>
+  </div>
+</div>
+
 <script>
+/* ===== 모바일 전용 게이트 ===== */
+(function mobileGate(){
+  const params = new URLSearchParams(location.search);
+  const bypass = params.get('desk') === '1';
+  const isMobileUA = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
+  const narrowViewport = Math.min(window.innerWidth, window.innerHeight) <= 900;
+  const allow = bypass || (isMobileUA || narrowViewport);
+  const gate = document.getElementById('deskblock');
+  if(!allow){ gate.classList.add('show'); }
+})();
+
 /* ===== 설정 ===== */
 const WEBHOOK_URL  = "https://hook.us2.make.com/95cj2g36m4tsgu82h1bu41gf4swboiks";
 const DELETE_URL   = "https://hook.us2.make.com/j2naw84osfkadkga7xkrljj8ep6rvroh";
@@ -410,7 +438,7 @@ function renderVehicle(vehicle){
   }
   refreshPrev();
 
-  /* 최근 기록 카드 */
+  /* 최근 기록 카드 (요청한 3줄 구성) */
   const histCard=ce('div',{className:'history'});
   histCard.append(ce('div',{className:'section-title',textContent:'최근 기록'}));
   histCard.append(ce('div',{id:'histBody'}));
@@ -447,7 +475,7 @@ function renderRecentTab(){
             <div class="kmcircle">${Number.isFinite(day)&&day>0 ? `${day}km` : '—'}</div>
             <div class="hcell">
               <div class="hrow1"><div class="title">${name} · ${dept}</div><div class="metaR">${vname}</div></div>
-              <div class="hrow2">주행후 ${post}km${memo?` · ${memo}`:''}</div>
+              <div class="hrow2">${memo?memo:''}${Number.isFinite(post)?` · 주행후 ${post}km`:''}</div>
               <div class="hrow3">${date}</div>
             </div>
           </div>`;
@@ -467,7 +495,7 @@ function renderRecentTab(){
   startPolling('RECENT');
 }
 
-/* ===== 차량별 히스토리 + 삭제 ===== */
+/* ===== 차량별 히스토리 + 삭제 (3줄 구성 반영) ===== */
 function loadHistory(vehicle,force){
   const body=el('#histBody'); if(!body) return;
   fetchCsv(rows=>{
@@ -485,8 +513,8 @@ function loadHistory(vehicle,force){
           <div class="hitem">
             <div class="kmcircle">${Number.isFinite(day)&&day>0 ? `${day}km` : '—'}</div>
             <div class="hcell">
-              <div class="hrow1"><div class="title">${name} · ${dept}</div><div class="metaR">주행후 ${post}km</div></div>
-              <div class="hrow2">${memo||''}</div>
+              <div class="hrow1"><div class="title">${name} · ${dept}</div><div class="metaR"></div></div>
+              <div class="hrow2">${memo||''}${Number.isFinite(post)?` · 주행후 ${post}km`:''}</div>
               <div class="hrow3">${date}</div>
             </div>
             ${DELETE_URL ? `<button class="btn small" data-action="delete" data-ts="${String(tsRaw).replace(/"/g,'&quot;')}" data-vehicle="${vehicle}">삭제</button>` : ''}
@@ -612,13 +640,14 @@ window.addEventListener('hashchange', ()=>{
   else if (first && !['sheet','more'].includes(first)){ startPolling('VEH:'+first.toUpperCase()); }
 })();
 
-/* ===== QR 모달 제어 (라이브러리 → 실패 시 이미지 대체) ===== */
+/* ===== QR 모달 (다중 폴백) ===== */
 function openQRForVehicle(vehicle, vname){
   const modal = el('#qrModal');
   const canvas = el('#qrCanvas');
   const img = el('#qrImg');
   const title = el('#qrTitle');
-  const downloadBtn = el('#qrDownload');
+  const dlBtn = el('#qrDownload');
+  const shareBtn = el('#qrShare');
   const closeBtn = el('#qrClose');
 
   const base = location.origin + location.pathname.replace(/index\.html?$/,'');
@@ -627,9 +656,9 @@ function openQRForVehicle(vehicle, vname){
   title.textContent = `${vname} (${vehicle}) 페이지 QR`;
   modal.classList.add('show');
 
-  // 초기 상태
   canvas.style.display='block';
   img.style.display='none';
+
   const drawWithLib = () => new Promise((resolve,reject)=>{
     if (typeof QRCode === 'undefined' || !QRCode.toCanvas) return reject(new Error('lib not ready'));
     try{
@@ -639,25 +668,49 @@ function openQRForVehicle(vehicle, vname){
     }catch(e){ reject(e); }
   });
 
-  drawWithLib().catch(()=>{
-    // 실패하면 구글 차트 이미지로 대체
-    const src = 'https://chart.googleapis.com/chart?cht=qr&chs=256x256&chl='+encodeURIComponent(url);
-    img.src = src;
-    img.style.display='block';
-    canvas.style.display='none';
+  const useExternalImage = () => new Promise((resolve,reject)=>{
+    const api = 'https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=' + encodeURIComponent(url);
+    img.onload = ()=>{ img.style.display='block'; canvas.style.display='none'; resolve(api); };
+    img.onerror=()=>reject(new Error('img blocked'));
+    img.src = api;
   });
 
-  downloadBtn.onclick = function(){
-    if (canvas.style.display!=='none'){
-      const a = document.createElement('a');
-      a.download = `QR_${vehicle}.png`;
-      a.href = canvas.toDataURL('image/png');
-      a.click();
-    }else{
-      // 이미지 대체인 경우: 새 탭 열기(모바일은 길게 눌러 저장)
-      window.open(img.src, '_blank');
-    }
+  drawWithLib().catch(()=>useExternalImage().catch(()=>{
+    // 최종 폴백: 이미지/캔버스 둘다 실패 → 안내
+    canvas.style.display='none';
+    img.style.display='none';
+    toast('QR 생성 실패. 링크를 복사했습니다.', false);
+    navigator.clipboard?.writeText(url).catch(()=>{});
+  }));
+
+  dlBtn.onclick = async function(){
+    try{
+      if (canvas.style.display!=='none'){
+        const a = document.createElement('a');
+        a.download = `QR_${vehicle}.png`;
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+      }else if (img.style.display!=='none' && img.src){
+        const r = await fetch(img.src); const b = await r.blob();
+        const a = document.createElement('a');
+        a.download = `QR_${vehicle}.png`;
+        a.href = URL.createObjectURL(b);
+        a.click();
+        setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+      }else{
+        await navigator.clipboard.writeText(url);
+        toast('QR 대신 링크를 복사했습니다.', true);
+      }
+    }catch{ toast('다운로드 실패', false); }
   };
+
+  shareBtn.onclick = async function(){
+    try{
+      if(navigator.share){ await navigator.share({title:`${vname} 운행기록`, url}); }
+      else{ await navigator.clipboard.writeText(url); toast('링크 복사 완료', true); }
+    }catch{}
+  };
+
   const close = ()=> modal.classList.remove('show');
   closeBtn.onclick = close;
   modal.onclick = (e)=>{ if(e.target===modal) close(); };
