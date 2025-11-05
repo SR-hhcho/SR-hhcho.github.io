@@ -6,7 +6,6 @@
 <meta name="theme-color" content="#1b64da" />
 <title>업무용 운행기록</title>
 
-<!-- 안정적 웹폰트 -->
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet"
       href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css"
@@ -73,7 +72,7 @@ button.primary:active{background:var(--blue-press)}
 .plate{font-weight:900;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .idtag{font-size:12px;font-weight:800;color:#1e40af;background:#eef2ff;padding:4px 10px;border-radius:999px;border:1px solid #dbe6ff;white-space:nowrap}
 
-/* 작은 QR 버튼(홈 타일 우상단) */
+/* 홈 타일 우상단 QR 버튼 */
 .qr-mini{
   position:absolute; right:10px; top:10px;
   z-index:2; pointer-events:auto;
@@ -93,17 +92,21 @@ button.primary:active{background:var(--blue-press)}
 .hrow2{color:#374151;font-size:12.5px;line-height:1.3;word-break:keep-all}
 .hrow3{color:#6b7280;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-/* 차량 헤더 배지: 더 작고 납작(가로 넓게, 세로 얕게) */
+/* 차량 헤더 배지: 더 좁고 얕게 */
 .head-card{display:flex;gap:12px;align-items:center}
 .vchip2{
-  width:150px;height:62px;border-radius:14px;
-  background:var(--chip);border:1px solid var(--chip-border); color:#1e40af;
-  display:flex;flex-direction:column;justify-content:center;align-items:center;
-  line-height:1.05;font-weight:900;box-shadow:0 4px 12px rgba(0,0,0,.04);text-align:center;padding:4px 8px
+  width:128px; height:56px; border-radius:14px;
+  background:var(--chip); border:1px solid var(--chip-border); color:#1e40af;
+  display:flex; flex-direction:column; justify-content:center; align-items:center;
+  line-height:1.05; font-weight:900; box-shadow:0 4px 12px rgba(0,0,0,.04); text-align:center; padding:4px 8px
 }
-.vchip2 .plate{font-size:16px;max-width:138px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vchip2 .vid{font-size:12px;opacity:.85}
-.head-desc{margin-left:auto;max-width:calc(100% - 170px);font-size:12px;line-height:1.35;color:#4b5563}
+.vchip2 .plate{font-size:15px;max-width:116px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vchip2 .vid{font-size:11px;opacity:.85}
+.head-desc{
+  margin-left:auto;
+  max-width:calc(100% - 146px); /* 배지 폭+간격 */
+  font-size:12px; line-height:1.35; color:#4b5563
+}
 
 /* 하단 탭바 */
 .tabbar{position:fixed;left:0;right:0;bottom:0;height:64px;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);z-index:50}
@@ -163,7 +166,7 @@ button.primary:active{background:var(--blue-press)}
   <a href="#/more" class="tab" id="tab-more"><svg class="ico" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="12" r="2" fill="currentColor"/></svg>더보기</a>
 </nav>
 
-<!-- QR 라이브러리 -->
+<!-- qrcode 라이브러리(있으면 사용, 없어도 동작하게 만들었음) -->
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 
 <!-- QR 모달 -->
@@ -171,6 +174,7 @@ button.primary:active{background:var(--blue-press)}
   <div class="inner">
     <h3 id="qrTitle">QR</h3>
     <canvas id="qrCanvas" width="256" height="256" style="width:256px;height:256px"></canvas>
+    <img id="qrImg" alt="QR" style="display:none;width:256px;height:256px"/>
     <div class="row" style="margin-top:14px">
       <button class="btn" id="qrDownload" type="button">다운로드</button>
       <button class="btn" id="qrClose" type="button">닫기</button>
@@ -372,7 +376,7 @@ function renderVehicle(vehicle){
 
       odoI.value=''; memoI.value=''; odoI.focus();
 
-      // 두 번 갱신(즉시 + 지연)
+      // 두 번 갱신
       await refreshPrev(true);
       loadHistory(vehicle,true);
       setTimeout(()=>{ refreshPrev(true); loadHistory(vehicle,true); }, 1400);
@@ -385,7 +389,7 @@ function renderVehicle(vehicle){
     }
   };
 
-  /* === 운행 전 km = 해당 차량의 "가장 최신 주행후" 값 === */
+  /* 운행 전 = 최신 주행후 */
   async function refreshPrev(force){
     return new Promise(res=>{
       fetchCsv(rows=>{
@@ -415,9 +419,6 @@ function renderVehicle(vehicle){
 
   startPolling('VEH:'+vehicle);
 }
-
-/* ===== 운행일지 탭 ===== */
-function renderSheetTab(){ const page=el('#page'); page.innerHTML=''; page.append(section('운행일지')); page.append(ce('p',{className:'caption',textContent:'차량을 선택해 “운행일지 양식”을 읽기 모드로 확인하세요.'})); }
 
 /* ===== 최근기록 탭 ===== */
 function renderRecentTab(){
@@ -498,9 +499,6 @@ function loadHistory(vehicle,force){
 /* ===== 헬퍼 ===== */
 function field(label,input){ const w=ce('div',{style:'flex:1'}); w.append(ce('label',{textContent:label}),input); return w; }
 function fieldLabelled(labelText,inputEl,required=false){ const wrap=ce('div',{style:'flex:1'}); const lab=ce('label',{textContent:labelText,className:required?'req':''}); wrap.append(lab,inputEl); return wrap; }
-
-/* ===== 더보기(생략) ===== */
-function renderMoreTab(){ const page=el('#page'); page.innerHTML=''; page.append(section('더보기')); }
 
 /* 삭제 위임 */
 document.addEventListener('click', (e) => {
@@ -614,10 +612,11 @@ window.addEventListener('hashchange', ()=>{
   else if (first && !['sheet','more'].includes(first)){ startPolling('VEH:'+first.toUpperCase()); }
 })();
 
-/* ===== QR 모달 제어 ===== */
+/* ===== QR 모달 제어 (라이브러리 → 실패 시 이미지 대체) ===== */
 function openQRForVehicle(vehicle, vname){
   const modal = el('#qrModal');
   const canvas = el('#qrCanvas');
+  const img = el('#qrImg');
   const title = el('#qrTitle');
   const downloadBtn = el('#qrDownload');
   const closeBtn = el('#qrClose');
@@ -628,17 +627,36 @@ function openQRForVehicle(vehicle, vname){
   title.textContent = `${vname} (${vehicle}) 페이지 QR`;
   modal.classList.add('show');
 
-  try{
-    QRCode.toCanvas(canvas, url, {width:256, margin:1}, function(err){
-      if(err){ toast('QR 생성 실패', false); }
-    });
-  }catch(e){ toast('QR 라이브러리 로드 실패', false); }
+  // 초기 상태
+  canvas.style.display='block';
+  img.style.display='none';
+  const drawWithLib = () => new Promise((resolve,reject)=>{
+    if (typeof QRCode === 'undefined' || !QRCode.toCanvas) return reject(new Error('lib not ready'));
+    try{
+      QRCode.toCanvas(canvas, url, {width:256, margin:1}, function(err){
+        if(err) reject(err); else resolve();
+      });
+    }catch(e){ reject(e); }
+  });
+
+  drawWithLib().catch(()=>{
+    // 실패하면 구글 차트 이미지로 대체
+    const src = 'https://chart.googleapis.com/chart?cht=qr&chs=256x256&chl='+encodeURIComponent(url);
+    img.src = src;
+    img.style.display='block';
+    canvas.style.display='none';
+  });
 
   downloadBtn.onclick = function(){
-    const a = document.createElement('a');
-    a.download = `QR_${vehicle}.png`;
-    a.href = canvas.toDataURL('image/png');
-    a.click();
+    if (canvas.style.display!=='none'){
+      const a = document.createElement('a');
+      a.download = `QR_${vehicle}.png`;
+      a.href = canvas.toDataURL('image/png');
+      a.click();
+    }else{
+      // 이미지 대체인 경우: 새 탭 열기(모바일은 길게 눌러 저장)
+      window.open(img.src, '_blank');
+    }
   };
   const close = ()=> modal.classList.remove('show');
   closeBtn.onclick = close;
