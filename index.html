@@ -92,20 +92,29 @@ button.primary:active{background:var(--blue-press)}
 .hrow2{color:#374151;font-size:12.5px;line-height:1.3;word-break:keep-all}
 .hrow3{color:#6b7280;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-/* 차량 헤더 배지(더 작게) */
-.head-card{display:flex;gap:10px;align-items:center}
+/* 배지 박스 크기 줄이기 */
 .vchip2{
-  width:110px;height:52px;border-radius:12px;
-  background:var(--chip);border:1px solid var(--chip-border);color:#1e40af;
-  display:flex;flex-direction:column;justify-content:center;align-items:center;
-  line-height:1.05;font-weight:900;box-shadow:0 4px 12px rgba(0,0,0,.04);text-align:center;padding:4px 6px
+  width:100px;          /* 가로폭: 차량명 글자 1자 정도 줄이기(110→100) */
+  height:auto;          /* 고정 높이 제거 → 내용 높이에 맞춤 */
+  padding:2px 6px;      /* 위아래 여백 최소화 → 거의 'V001' 텍스트 높이 수준 */
+  border-radius:10px;   /* 살짝 더 얇아 보이게(선택) */
+  line-height:1.05;
 }
-.vchip2 .plate{font-size:14px;max-width:98px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vchip2 .vid{font-size:10px;opacity:.85}
+
+/* 배지 안 글자 크기/줄바꿈 폭 조정 */
+.vchip2 .plate{
+  font-size:13px;       /* 1pt 줄임 */
+  max-width:92px;       /* 가로폭 줄인 만큼 텍스트 최대폭도 축소(98→92) */
+}
+.vchip2 .vid{
+  font-size:10px;       /* 그대로(‘V001’ 높이 기준) */
+}
+
+/* 오른쪽 설명 영역 폭도 배지 가로폭에 맞춰 재계산 */
 .head-desc{
-  margin-left:auto;max-width:calc(100% - 126px);
-  font-size:11px;line-height:1.35;color:#4b5563   /* 1p 축소 */
+  max-width:calc(100% - 116px); /* 100px(배지폭) + 16px(양쪽 여백/간격 보정) */
 }
+
 
 /* 하단 탭바 */
 .tabbar{position:fixed;left:0;right:0;bottom:0;height:64px;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);z-index:50}
@@ -718,3 +727,4 @@ function openQRForVehicle(vehicle, vname){
 </script>
 </body>
 </html>
+
