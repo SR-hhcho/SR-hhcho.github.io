@@ -24,10 +24,17 @@
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
-  margin:0;background:var(--bg);color:var(--text);
+  margin:0;background:#e5e7eb;color:var(--text);
   font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",Segoe UI,Roboto,Helvetica,Arial,system-ui,sans-serif;
 }
-.wrap{min-height:100%;display:flex;flex-direction:column}
+.wrap{
+  min-height:100%;
+  display:flex;
+  flex-direction:column;
+  max-width:480px;
+  margin:0 auto;
+  background:var(--bg);
+}
 
 /* 앱바 */
 .appbar{position:sticky;top:0;z-index:60;height:56px;background:#fff;border-bottom:1px solid var(--line);
@@ -109,7 +116,7 @@ button.primary:active{background:var(--blue-press)}
 /* 가운데 본문(3줄) */
 .hcell{flex:1;min-width:0}
 .hrow1{display:flex;justify-content:space-between;gap:8px}
-.hrow1 .title{font-weight:900;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hrow1 .title{font-weight:900;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hrow1 .metaR{color:#64748b;font-size:12px;white-space:nowrap}
 .hrow2{color:#374151;font-size:12.5px;line-height:1.3;word-break:keep-all}
 .hrow2 .postkm{font-weight:900;color:#111;margin-left:6px}
@@ -120,9 +127,12 @@ button.primary:active{background:var(--blue-press)}
 
 /* ===== 차량 헤더(배지 + 설명) ===== */
 .head-card{display:flex;gap:12px;align-items:center}
+
+/* 👉 여기 배지 크기 줄인 부분 */
 .vchip2{
-  min-width:96px;
-  max-width:96px;
+  min-width:88px;
+  max-width:88px;
+  height:54px;
   border-radius:12px;
   background:var(--chip);
   border:1px solid var(--chip-border);
@@ -134,23 +144,23 @@ button.primary:active{background:var(--blue-press)}
   line-height:1.1;
   font-weight:900;
   box-shadow:0 4px 12px rgba(0,0,0,.04);
-  padding:4px 6px;
+  padding:4px 4px;
   text-align:center;
 }
 .vchip2 .plate{
-  font-size:13px;
-  max-width:88px;
+  font-size:12px;
+  max-width:80px;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
 }
-.vchip2 .vid{font-size:10px;margin-top:2px;opacity:.9}
+.vchip2 .vid{font-size:10px;margin-top:1px;opacity:.9}
 
-/* 오른쪽 설명: 2줄, 작은 폰트 */
+/* 오른쪽 설명(폰트 1pt 줄임) */
 .head-desc{
   margin-left:8px;
-  max-width:calc(100% - 120px);
-  font-size:12px;line-height:1.35;color:#4b5563
+  max-width:calc(100% - 112px);
+  font-size:11px;line-height:1.4;color:#4b5563
 }
 
 /* 하단 탭바 */
@@ -202,7 +212,7 @@ button.primary:active{background:var(--blue-press)}
 .summary-title{font-weight:900;margin-bottom:4px}
 .summary-sub{font-size:13px;color:#4b5563}
 
-/* 간단한 데스크톱 경고 배너 */
+/* 데스크톱 경고 배너 */
 @media (min-width:900px){
   .desktop-warning{
     position:fixed;top:56px;left:0;right:0;
@@ -210,7 +220,6 @@ button.primary:active{background:var(--blue-press)}
     padding:6px 10px;font-size:12px;text-align:center;
     z-index:40;border-bottom:1px solid #ffeeba;
   }
-  body{padding-top:0}
 }
 </style>
 </head>
@@ -351,7 +360,6 @@ el('#qrDownload').onclick = ()=>{
 };
 
 /* ===== 10초 자동 새로고침(최근/차량) ===== */
-/* ★ 여기 let → var 로 바꾼 부분 ★ */
 var _pollTimer = null;
 var _lastStamp = '';
 function calcStamp(rows, vehicle){
@@ -470,7 +478,6 @@ function renderVehicle(vehicle){
   row2.append(fieldLabelled('운행 후 km(숫자)', odoI, true), field('비고(선택)', memoI));
   card.append(row2);
 
-  // 운행전 배지 + 안내
   const meta = ce('div',{style:'display:flex;align-items:center;gap:8px'});
   const prevBadge = ce('span',{className:'prevkm',textContent:'운행 전: 확인중…'});
   const micro = ce('div',{className:'micro',textContent:'내 정보는 이 기기에만 저장됩니다.'});
@@ -478,7 +485,6 @@ function renderVehicle(vehicle){
   card.append(meta);
   page.append(card);
 
-  // 액션
   const actions = ce('div',{className:'actions'});
   const backBtn = ce('a',{className:'btn ghost',href:'#/'}); backBtn.textContent='← 홈으로';
   const resetBtn= ce('button',{className:'btn',type:'button'}); resetBtn.textContent='내 정보 초기화';
@@ -491,7 +497,6 @@ function renderVehicle(vehicle){
   sticky.append(submit);
   page.append(sticky);
 
-  // 저장값 복원
   const keyN='drive_userName', keyD='drive_dept';
   const savedN=localStorage.getItem(keyN), savedD=localStorage.getItem(keyD);
   if(savedN && NAME_ALLOW.includes(savedN)) nameSel.value=savedN;
@@ -558,7 +563,7 @@ function renderVehicle(vehicle){
     }
   };
 
-  // 운행 전 km 표시: 해당 차량의 가장 최신 로그의 "주행후 km"
+  // 🚗 운행 전 km = 가장 최근 로그의 "주행후 km"
   async function refreshPrev(force){
     return new Promise(res=>{
       fetchCsv(rows=>{
@@ -706,7 +711,7 @@ function loadHistory(vehicle,force){
 function field(label,input){ const w=ce('div',{style:'flex:1'}); w.append(ce('label',{textContent:label}),input); return w; }
 function fieldLabelled(labelText,inputEl,required=false){ const wrap=ce('div',{style:'flex:1'}); const lab=ce('label',{textContent:labelText,className:required?'req':''}); wrap.append(lab,inputEl); return wrap; }
 
-/* ===== 더보기: 메일 담당자/QR ===== */
+/* ===== 더보기 탭 ===== */
 function renderMoreTab(){
   const page=el('#page'); page.innerHTML='';
   page.append(section('더보기'));
@@ -722,12 +727,10 @@ function renderMoreTab(){
       localStorage.removeItem('drive_userName');localStorage.removeItem('drive_dept');toast('이름/부서 저장값을 삭제했습니다.');
     }),
     tile('HOME 화면 QR','<path d="M3 3h18v18H3z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M7 7h3v3H7zM14 7h3v3h-3zM14 14h3v3h-3z" fill="currentColor"/>',openHomeQrModal),
-    tile('차량별 QR 모음','<circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 12h6M12 9v6" stroke="currentColor" stroke-width="2"/>',()=>{}),
     tile('메일 담당자','<path d="M3 5h18v14H3z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 6l9 6 9-6" fill="none" stroke="currentColor" stroke-width="2"/>',showContacts)
   );
   page.append(grid);
 
-  // 차량별 QR 리스트
   const qrCard=ce('div',{className:'card'});
   qrCard.append(ce('div',{className:'section-title',textContent:'차량별 QR'}));
   VEHICLES.forEach(v=>{
@@ -746,7 +749,7 @@ function showContacts(){
   }).catch(()=>toast('불러오기 실패',false));
 }
 
-/* ===== 공통: 반영 대기 폴링 후크 ===== */
+/* ===== 기록 반영 대기 ===== */
 function waitUntilUpdated(vehicle,beforeCount,timeoutMs=12000){
   const started=Date.now();
   return new Promise((resolve)=>{
