@@ -15,9 +15,6 @@
         href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css"
         crossorigin>
 
-  <!-- QR 코드 라이브러리 -->
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-
   <style>
     :root{
       --bg:#f7f8fa; --card:#fff; --text:#111; --sub:#717680; --line:#e5e8eb;
@@ -57,12 +54,17 @@
       box-shadow:0 6px 24px rgba(17,17,17,.06)
     }
     .row{display:flex;gap:8px}
-    label{display:block;font-size:12px;color:var(--sub);margin:8px 2px 4px}
+    label{
+      display:block;font-size:12px;color:var(--sub);
+      margin:8px 2px 4px;
+      font-weight:700; /* ← 라벨(성명/부서/운행후km/비고) 굵기 */
+    }
     label.req::after{content:" *";color:#1b64da;font-weight:900}
     input,textarea,select{
       width:100%;font-size:16px;padding:12px;border-radius:12px;
       border:1px solid var(--line);background:#fff;outline:none;
-      transition:border .15s,box-shadow .15s;font-family:inherit
+      transition:border .15s,box-shadow .15s;font-family:inherit;
+      font-weight:700; /* ← 입력/선택 값도 굵게 */
     }
     input:focus,textarea:focus,select:focus{
       border-color:#b4c6ff;box-shadow:0 0 0 3px rgba(27,100,218,.15)
@@ -123,7 +125,7 @@
       padding:6px 14px;cursor:pointer
     }
 
-    /* 차량 페이지 헤더 배지 (요청: 더 작게) */
+    /* 차량 페이지 헤더 배지(축소) */
     .head-card{display:flex;gap:12px;align-items:center}
     .vchip2{
       min-width:120px;max-width:140px;height:52px;
@@ -136,7 +138,8 @@
     .vchip2 .vid{font-size:11px;opacity:.9}
     .head-desc{
       margin-left:auto;max-width:calc(100% - 150px);
-      font-size:12px;line-height:1.35;color:#4b5563
+      font-size:11px; /* ← 차량 페이지 안내문 폰트 크기 (원하면 10~13px 사이로 여기만 수정) */
+      line-height:1.35;color:#4b5563
     }
 
     /* 히스토리 카드 */
@@ -154,7 +157,10 @@
     }
     .hcell{flex:1;min-width:0}
     .hrow1{display:flex;justify-content:space-between;gap:8px}
-    .hrow1 .title{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
+    .hrow1 .title{
+      font-weight:900;font-size:12px; /* ← 이름/부서 1pt 정도 줄임 */
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+    }
     .hrow1 .metaR{color:#64748b;font-size:11px;white-space:nowrap}
     .hrow2{color:#374151;font-size:12px;line-height:1.3;word-break:keep-all}
     .hrow2 .postkm{font-weight:900;color:#111;margin-left:4px}
@@ -213,7 +219,12 @@
       display:flex;flex-direction:column;align-items:center;gap:14px
     }
     .qr-title{font-weight:900;font-size:16px;text-align:center}
-    .qr-canvas-wrap{width:220px;height:220px;display:flex;align-items:center;justify-content:center}
+    .qr-canvas-wrap{
+      width:220px;height:220px;display:flex;align-items:center;justify-content:center
+    }
+    #qrImg{
+      width:220px;height:220px;object-fit:contain;
+    }
     .qr-buttons{display:flex;gap:10px;width:100%;margin-top:2px}
     .qr-buttons button{flex:1}
 
@@ -263,7 +274,8 @@
     <div class="qr-modal">
       <div id="qrTitle" class="qr-title"></div>
       <div class="qr-canvas-wrap">
-        <canvas id="qrCanvas" width="220" height="220"></canvas>
+        <!-- ← 여기 이미지 src만 바꿔서 QR 표시 -->
+        <img id="qrImg" alt="QR">
       </div>
       <div class="qr-buttons">
         <button id="qrDownload" class="btn">다운로드</button>
@@ -689,12 +701,16 @@ function renderMoreTab(){
   btnHomeQr.onclick=()=>openQrModal('HOME 화면 QR', location.origin+location.pathname+'#/');
   list.append(btnHomeQr);
 
-  const btnVehicleQr=ce('button',{className:'btn',type:'button',textContent:'차량별 QR 모음'});
-  btnVehicleQr.onclick=()=>{
-    const names = VEHICLES.map(v=>`${v.name} (${v.id})`).join('\n');
-    alert('원하는 차량의 타일에서 QR 버튼을 눌러주세요.\n\n'+names);
-  };
-  list.append(btnVehicleQr);
+  const title=ce('div',{style:'margin-top:8px;font-size:13px;font-weight:700;color:#374151',textContent:'차량별 QR'});
+  list.append(title);
+
+  VEHICLES.forEach(v=>{
+    const b=ce('button',{className:'btn small',type:'button'});
+    b.style.justifyContent='space-between';
+    b.innerHTML=`<span>${v.name} (${v.id})</span><span style="font-size:12px;color:#1b64da;font-weight:800">QR 보기</span>`;
+    b.onclick=()=>openQrModal(`${v.name} (${v.id}) 페이지 QR`, location.origin+location.pathname+`#/${v.id}`);
+    list.append(b);
+  });
 
   card.append(list); page.append(card);
 }
@@ -703,24 +719,26 @@ function renderMoreTab(){
 function openQrModal(title,url){
   const backdrop=el('#qrBackdrop');
   const titleEl=el('#qrTitle');
-  const canvas=el('#qrCanvas');
+  const img=el('#qrImg');
+
   titleEl.textContent=title;
-  const ctx=canvas.getContext('2d');
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  if(window.QRCode){
-    QRCode.toCanvas(canvas,url,{width:220,margin:1},err=>{
-      if(err) console.error(err);
-    });
-  }
+
+  // 무료 QR 이미지 API 사용
+  const apiUrl='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent(url);
+  img.src=apiUrl;
+
   backdrop.classList.add('show');
 
   const downloadBtn=el('#qrDownload');
   const closeBtn=el('#qrClose');
+
   downloadBtn.onclick=()=>{
     const a=document.createElement('a');
-    a.download='qr.png';
-    a.href=canvas.toDataURL('image/png');
+    a.download='qr_'+Date.now()+'.png';
+    a.href=apiUrl;
+    document.body.appendChild(a);
     a.click();
+    a.remove();
   };
   closeBtn.onclick=()=>backdrop.classList.remove('show');
   backdrop.onclick=(e)=>{ if(e.target===backdrop) backdrop.classList.remove('show'); };
