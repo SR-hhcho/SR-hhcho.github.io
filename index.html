@@ -350,6 +350,46 @@ el('#qrDownload').onclick = ()=>{
   document.body.removeChild(a);
 };
 
+/* ===== 10초 자동 새로고침(최근/차량) ===== */
+/* ★ 여기 let → var 로 바꾼 부분 ★ */
+var _pollTimer = null;
+var _lastStamp = '';
+function calcStamp(rows, vehicle){
+  if (!rows || rows.length<=1) return '';
+  if (vehicle){
+    for(let i=rows.length-1;i>=1;i--){
+      const r=rows[i];
+      if ((r[1]||'').toUpperCase()===vehicle) {
+        return String(r[0]||'') + '|' + String(r[5]||'') + '|' + String(r[6]||'');
+      }
+    }
+    return '';
+  }else{
+    const r = rows[rows.length-1] || [];
+    return String(r[0]||'') + '|' + String(r[1]||'') + '|' + String(r[5]||'') + '|' + String(r[6]||'');
+  }
+}
+function startPolling(key){
+  if (_pollTimer){ clearInterval(_pollTimer); _pollTimer=null; }
+  if (!key){ _lastStamp=''; return; }
+
+  const isVehicle = key && key.startsWith('VEH:');
+  const vehicle = isVehicle ? key.slice(4) : null;
+
+  fetchCsv(rows=>{ _lastStamp = calcStamp(rows, vehicle); }, true);
+
+  _pollTimer = setInterval(()=>{
+    fetchCsv(rows=>{
+      const now = calcStamp(rows, vehicle);
+      if (now && now !== _lastStamp){
+        _lastStamp = now;
+        if (isVehicle){ loadHistory(vehicle,true); }
+        else if (key==='RECENT'){ renderRecentTab(); }
+      }
+    }, true);
+  }, 10000);
+}
+
 /* ===== 라우터 ===== */
 function route(){
   const seg=(location.hash||'#/').slice(2).split('/').filter(Boolean);
@@ -528,7 +568,7 @@ function renderVehicle(vehicle){
           if(String(r[1]||'').toUpperCase()===vehicle){ last=r; break; }
         }
         if(last){
-          const post=Number(last[5]||''); // 주행후
+          const post=Number(last[5]||'');
           prevBadge.textContent = Number.isFinite(post)? `운행 전: ${post} km` : '운행 전: —';
         }else{
           prevBadge.textContent='운행 전: (첫 기록)';
@@ -706,7 +746,7 @@ function showContacts(){
   }).catch(()=>toast('불러오기 실패',false));
 }
 
-/* ===== 공통: 반영 대기 폴링 ===== */
+/* ===== 공통: 반영 대기 폴링 후크 ===== */
 function waitUntilUpdated(vehicle,beforeCount,timeoutMs=12000){
   const started=Date.now();
   return new Promise((resolve)=>{
@@ -739,45 +779,6 @@ async function deleteAndRefresh(ts, vehicle, btn){
     setTimeout(()=>{ loadHistory(vehicle,true); if(location.hash==='#/recent') renderRecentTab(); },700);
   }catch(e){ toast('삭제 오류: '+e.message,false); }
   finally{ btn && (btn.disabled=false); }
-}
-
-/* ===== 10초 자동 새로고침(최근/차량) ===== */
-let _pollTimer = null;
-let _lastStamp = '';
-function calcStamp(rows, vehicle){
-  if (!rows || rows.length<=1) return '';
-  if (vehicle){
-    for(let i=rows.length-1;i>=1;i--){
-      const r=rows[i];
-      if ((r[1]||'').toUpperCase()===vehicle) {
-        return String(r[0]||'') + '|' + String(r[5]||'') + '|' + String(r[6]||'');
-      }
-    }
-    return '';
-  }else{
-    const r = rows[rows.length-1] || [];
-    return String(r[0]||'') + '|' + String(r[1]||'') + '|' + String(r[5]||'') + '|' + String(r[6]||'');
-  }
-}
-function startPolling(key){
-  if (_pollTimer){ clearInterval(_pollTimer); _pollTimer=null; }
-  if (!key){ _lastStamp=''; return; }
-
-  const isVehicle = key && key.startsWith('VEH:');
-  const vehicle = isVehicle ? key.slice(4) : null;
-
-  fetchCsv(rows=>{ _lastStamp = calcStamp(rows, vehicle); }, true);
-
-  _pollTimer = setInterval(()=>{
-    fetchCsv(rows=>{
-      const now = calcStamp(rows, vehicle);
-      if (now && now !== _lastStamp){
-        _lastStamp = now;
-        if (isVehicle){ loadHistory(vehicle,true); }
-        else if (key==='RECENT'){ renderRecentTab(); }
-      }
-    }, true);
-  }, 10000);
 }
 
 /* ===== 날짜 파서 ===== */
