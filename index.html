@@ -12,7 +12,7 @@
       href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css"
       crossorigin>
 
-<!-- 파비콘 -->
+<!-- 파비콘 (작은 보라색 네모 안에 '차') -->
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'><rect width='128' height='128' rx='24' fill='%231b64da'/><text x='50%' y='58%' text-anchor='middle' dominant-baseline='middle' font-family='Arial' font-size='84' fill='white'>차</text></svg>'>
 
 <style>
@@ -27,6 +27,8 @@ body{
   margin:0;background:#e5e7eb;color:var(--text);
   font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",Segoe UI,Roboto,Helvetica,Arial,system-ui,sans-serif;
 }
+
+/* 모바일 화면처럼 가운데 480px 폭으로 고정 */
 .wrap{
   min-height:100%;
   display:flex;
@@ -128,7 +130,7 @@ button.primary:active{background:var(--blue-press)}
 /* ===== 차량 헤더(배지 + 설명) ===== */
 .head-card{display:flex;gap:12px;align-items:center}
 
-/* 👉 여기 배지 크기 줄인 부분 */
+/* 👉 차량번호/ID 배지 크기 */
 .vchip2{
   min-width:88px;
   max-width:88px;
@@ -156,7 +158,7 @@ button.primary:active{background:var(--blue-press)}
 }
 .vchip2 .vid{font-size:10px;margin-top:1px;opacity:.9}
 
-/* 오른쪽 설명(폰트 1pt 줄임) */
+/* 오른쪽 설명(폰트 조금 더 작게) */
 .head-desc{
   margin-left:8px;
   max-width:calc(100% - 112px);
@@ -211,16 +213,6 @@ button.primary:active{background:var(--blue-press)}
 .summary-item{background:#fff;border-radius:14px;border:1px solid var(--line);padding:12px 14px;box-shadow:0 4px 14px rgba(0,0,0,.04)}
 .summary-title{font-weight:900;margin-bottom:4px}
 .summary-sub{font-size:13px;color:#4b5563}
-
-/* 데스크톱 경고 배너 */
-@media (min-width:900px){
-  .desktop-warning{
-    position:fixed;top:56px;left:0;right:0;
-    background:#fff3cd;color:#856404;
-    padding:6px 10px;font-size:12px;text-align:center;
-    z-index:40;border-bottom:1px solid #ffeeba;
-  }
-}
 </style>
 </head>
 <body>
@@ -229,10 +221,6 @@ button.primary:active{background:var(--blue-press)}
     <a class="appbtn" href="#/"><svg class="ico" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" fill="currentColor"/></svg></a>
     <div class="apptitle"><a href="#/">업무용 운행기록</a></div>
     <div></div>
-  </div>
-
-  <div id="desktopWarning" class="desktop-warning" style="display:none">
-    이 페이지는 모바일 화면에 최적화되어 있습니다. 입력은 가급적 휴대폰에서 진행해주세요.
   </div>
 
   <div id="page"></div>
@@ -282,7 +270,7 @@ const VEHICLES = [
   { id:"V003", name:"804너3147", img:"img/V003.jpg", type:"스타리아" }
 ];
 
-/* 허용 목록(전역) */
+/* 허용 목록 */
 const NAME_ALLOW = ["김학철","최종우","권철운","이승훈","권태국","윤종선","한동훈","박남주","남광현","김대현","원동섭","조항현"];
 const DEPT_ALLOW = ["안전관리팀","안전기술팀","영업공무팀"];
 
@@ -290,15 +278,9 @@ const DEPT_ALLOW = ["안전관리팀","안전기술팀","영업공무팀"];
 const el=(s,p=document)=>p.querySelector(s);
 const ce=(t,o={})=>Object.assign(document.createElement(t),o);
 const toast=(m,ok=true)=>{const t=el('#toast');t.textContent=m;t.className='toast '+(ok?'ok':'err');setTimeout(()=>t.className='toast',2200);};
-function setTab(name){['home','sheet','recent','more'].forEach(k=>el('#tab-'+k)?.classList.toggle('on',k===name));}
+function setTab(name){['home','sheet','recent','more'].forEach(k=>{const tab=el('#tab-'+k); if(tab) tab.classList.toggle('on',k===name);});}
 function section(title){return ce('div',{className:'section-title',textContent:title});}
 function setLoading(on,msg){const ov=el('#overlay');if(!ov) return;ov.classList.toggle('show',!!on);if(msg) ov.querySelector('.msg').textContent=msg;document.querySelectorAll('input,textarea,button,select').forEach(e=>e.disabled=!!on);}
-
-/* 데스크톱 경고 */
-(function(){
-  const w = el('#desktopWarning');
-  if(window.innerWidth>900) w.style.display='block';
-})();
 
 /* CSV 공통 */
 function fetchCsv(done,force){
@@ -310,7 +292,7 @@ function parseCSV(text){
   const rows=[];let row=[],cell='',q=false;
   for(let i=0;i<text.length;i++){
     const c=text[i],n=text[i+1];
-    if(q){ if(c==='"'&&n!='"'){q=false;continue;} if(c==='"'&&n==='"'){cell+='"';i++;continue;} cell+=c; continue; }
+    if(q){ if(c==='"'&&n!=='"'){q=false;continue;} if(c==='"'&&n==='"'){cell+='"';i++;continue;} cell+=c; continue; }
     if(c===','){ row.push(cell); cell=''; continue; }
     if(c==='\n'){ row.push(cell); rows.push(row); row=[]; cell=''; continue; }
     if(c==='"'){ q=true; continue; }
@@ -442,7 +424,6 @@ function renderVehicle(vehicle){
   const page = el('#page');
   page.innerHTML = '';
 
-  /* 헤더(배지 + 설명) */
   const head = ce('div',{className:'card head-card'});
   const vchip = ce('div',{className:'vchip2'});
   vchip.innerHTML = `
@@ -454,7 +435,6 @@ function renderVehicle(vehicle){
   head.append(vchip, desc);
   page.append(head);
 
-  /* 입력 카드 */
   const card = ce('div',{className:'card'});
 
   const row = ce('div',{className:'row'});
