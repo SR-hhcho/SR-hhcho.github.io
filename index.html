@@ -128,7 +128,7 @@
     /* 차량 페이지 헤더 배지(축소) */
     .head-card{display:flex;gap:12px;align-items:center}
     .vchip2{
-      min-width:110px;max-width:130px;height:48px;  /* 배지 크기 조정하려면 여기 min/max width, height 수정 */
+      min-width:110px;max-width:130px;height:48px;
       border-radius:14px;background:var(--chip);border:1px solid var(--chip-border);
       color:#1e40af;display:flex;flex-direction:column;justify-content:center;align-items:center;
       line-height:1.05;font-weight:900;box-shadow:0 4px 12px rgba(0,0,0,.04);
@@ -140,35 +140,6 @@
       margin-left:auto;max-width:calc(100% - 150px);
       font-size:10px; /* ← 차량 페이지 안내문 폰트 크기 (원하면 10~13px 사이로 여기만 수정) */
       line-height:1.35;color:#4b5563
-    }
-
-    /* ==== 현재시간(수정가능) 박스 ==== */
-    /* 텍스트 크기 조정은 time-label / time-main 에서 */
-    .time-field{margin-top:4px;margin-bottom:4px}
-    .time-label{
-      font-size:12px;          /* ← "현재시간(수정가능)" 글자 크기 */
-      color:var(--sub);
-      margin:8px 2px 4px;
-      font-weight:700;
-    }
-    .time-box{
-      width:100%;
-      border-radius:12px;
-      border:1px solid var(--line);
-      background:#f8fafc;
-      padding:10px 12px;
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-      cursor:pointer;
-    }
-    .time-main{
-      font-size:14px;          /* ← 실제 날짜/시간 표시 크기 (2pt 줄이고 싶으면 12px 정도로) */
-      font-weight:700;
-    }
-    .time-sub{
-      font-size:11px;
-      color:var(--sub);
     }
 
     /* 히스토리 카드 */
@@ -187,12 +158,12 @@
     .hcell{flex:1;min-width:0}
     .hrow1{display:flex;justify-content:space-between;gap:8px}
     .hrow1 .title{
-      font-weight:900;font-size:12px; /* ← 이름/부서 글자크기 */
+      font-weight:900;font-size:12px; /* ← 이름/부서 1pt 정도 줄임 */
       white-space:nowrap;overflow:hidden;text-overflow:ellipsis
     }
     .hrow1 .metaR{color:#64748b;font-size:11px;white-space:nowrap}
     .hrow2{color:#374151;font-size:12px;line-height:1.3;word-break:keep-all}
-    .hrow2 .postkm{font-weight:400;color:#111;margin-left:4px} /* ← 주행후 km는 굵게 X (400) */
+    .hrow2 .postkm{font-weight:400;color:#111;margin-left:4px} /* ← 주행후 km만 보통 굵기 */
     .hrow3{color:#6b7280;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
     /* 탭바 */
@@ -368,6 +339,17 @@ function setLoading(on,msg){
   if(msg) ov.querySelector('.msg').textContent=msg;
 }
 
+/* (NEW) Date → datetime-local value 변환 */
+function toDatetimeLocalValue(d){
+  const pad = n => String(n).padStart(2,'0');
+  const yyyy = d.getFullYear();
+  const mm   = pad(d.getMonth()+1);
+  const dd   = pad(d.getDate());
+  const hh   = pad(d.getHours());
+  const mi   = pad(d.getMinutes());
+  return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+}
+
 /* CSV 로딩 */
 function fetchCsv(done,force){
   if(!LOGS_CSV_URL){
@@ -438,7 +420,7 @@ function renderHome(){
   page.append(list);
 }
 
-/* ===== 폼 필드 공용 ===== */
+/* ===== 차량 페이지 ===== */
 function field(label,input){ const w=ce('div',{style:'flex:1'}); w.append(ce('label',{textContent:label}),input); return w; }
 function fieldLabelled(labelText,inputEl,required=false){
   const wrap=ce('div',{style:'flex:1'});
@@ -446,83 +428,37 @@ function fieldLabelled(labelText,inputEl,required=false){
   wrap.append(lab,inputEl); return wrap;
 }
 
-/* ===== Date → input value / 예쁜 한글 포맷 ===== */
-// Date → "YYYY-MM-DDTHH:MM"
-function toLocalDatetimeValue(d){
-  const pad = n => String(n).padStart(2,'0');
-  const yyyy = d.getFullYear();
-  const mm   = pad(d.getMonth()+1);
-  const dd   = pad(d.getDate());
-  const hh   = pad(d.getHours());
-  const mi   = pad(d.getMinutes());
-  return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
-}
-// Date → "25년 11월 12일 (수) 09 : 00 AM"
-function formatKRPrettyDateTime(d){
-  const yoil = ['일','월','화','수','목','금','토'][d.getDay()];
-  const pad  = n => String(n).padStart(2,'0');
-  const yy = String(d.getFullYear()).slice(-2);
-  const mm = pad(d.getMonth()+1);
-  const dd = pad(d.getDate());
-  let h  = d.getHours();
-  const ap = h >= 12 ? 'PM' : 'AM';
-  let hh12 = h % 12;
-  if(hh12 === 0) hh12 = 12;
-  const mi = pad(d.getMinutes());
-  return `${yy}년 ${mm}월 ${dd}일 (${yoil}) ${hh12} : ${mi} ${ap}`;
-}
-
-/* ===== 차량 페이지 ===== */
 function renderVehicle(vehicle){
   const v = VEHICLES.find(x=>x.id===vehicle) || {id:vehicle,name:'',label:''};
   const page = el('#page'); page.innerHTML='';
 
-  /* 헤더 카드 */
   const head = ce('div',{className:'card head-card'});
   const vchip = ce('div',{className:'vchip2'});
   vchip.innerHTML = `
     <div class="plate">${v.name || vehicle}</div>
-    <div class="vid">${vehicle}${v.label ? ' ('+v.label+')' : ''}</div>
+    <div class="vid">${vehicle} (${v.label||''})</div>
   `;
   const desc = ce('div',{className:'head-desc'});
-  // ↓ 안내문 폰트 크기를 바꾸고 싶으면 .head-desc CSS의 font-size 수정
+  // ↓ 이 문구 폰트 크기는 위 CSS 의 .head-desc 에서 조정 가능
   desc.innerHTML = '운행후 km와 운행목적을 입력해주세요.<br>이름/부서는 최초 1회만 저장하시면 됩니다.';
   head.append(vchip,desc);
   page.append(head);
 
   const card=ce('div',{className:'card'});
 
-  /* ==== 현재시간(수정가능) ==== */
-  const timeWrap  = ce('div',{className:'time-field'});
-  const timeLabel = ce('div',{className:'time-label',textContent:'현재시간(수정가능)'});
+  /* (NEW) 현재시간(수정가능) 행 */
+  const timeRow = ce('div',{className:'row'});
+  const timeInput = ce('input',{
+    id:'when',
+    type:'datetime-local'
+  });
+  timeInput.value = toDatetimeLocalValue(new Date()); // 접속 시점 시간으로 세팅
+  timeRow.append(
+    fieldLabelled('현재시간(수정가능)', timeInput, true)
+  );
+  card.append(timeRow);
+  /* (NEW 끝) */
 
-  const dtInput   = ce('input',{type:'datetime-local',id:'driveTime',style:'display:none'});
-  const now       = new Date();
-  dtInput.value   = toLocalDatetimeValue(now);
-
-  const timeBox   = ce('button',{type:'button',className:'time-box'});
-  const timeMain  = ce('div',{className:'time-main'});
-  const timeSub   = ce('div',{className:'time-sub',textContent:'필요 시 날짜/시간을 눌러 수정하세요.'});
-
-  function refreshTimeText(){
-    const val = dtInput.value;
-    const d   = val ? new Date(val) : new Date();
-    timeMain.textContent = formatKRPrettyDateTime(d);
-  }
-  refreshTimeText();
-
-  timeBox.append(timeMain,timeSub);
-  timeWrap.append(timeLabel,timeBox,dtInput);
-  card.append(timeWrap);
-
-  // 클릭 시 네이티브 datetime picker 열기
-  timeBox.onclick = () => {
-    if(dtInput.showPicker){ dtInput.showPicker(); }
-    dtInput.focus();
-  };
-  dtInput.addEventListener('change',refreshTimeText);
-
-  /* 성명 / 부서 */
   const row1=ce('div',{className:'row'});
   const nameSel=ce('select',{id:'userName'});
   nameSel.append(ce('option',{value:'',textContent:'성명 선택'}));
@@ -536,7 +472,6 @@ function renderVehicle(vehicle){
   );
   card.append(row1);
 
-  /* 운행후 / 비고 */
   const row2=ce('div',{className:'row'});
   const odoI=ce('input',{id:'odo',type:'number',inputMode:'numeric',placeholder:'예) 26400'});
   const memoI=ce('textarea',{id:'memo',placeholder:'시설점검 등'});
@@ -590,8 +525,13 @@ function renderVehicle(vehicle){
     const dept=deptSel.value;
     const odo=odoI.value.trim();
     const memo=memoI.value.trim();
-    const whenVal = dtInput.value || toLocalDatetimeValue(new Date()); // 사용자가 선택한 일시
+    const when=timeInput.value;   // (NEW) 사용자가 선택한 시간
 
+    if(!when){
+      toast('시간을 선택해주세요', false);
+      timeInput.focus();
+      return;
+    }
     if(!userName){toast('성명을 선택해주세요',false);nameSel.focus();return;}
     if(!dept){toast('부서를 선택해주세요',false);deptSel.focus();return;}
     if(!odo||isNaN(+odo)){toast('운행 후 km(숫자)를 입력해주세요',false);odoI.focus();return;}
@@ -612,17 +552,18 @@ function renderVehicle(vehicle){
       const resp=await fetch(WEBHOOK_URL,{
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({vehicle,userName,dept,odo,memo,when:whenVal})
+        body:JSON.stringify({vehicle,userName,dept,odo,memo,when}) // (NEW) when 전송
       });
       if(!resp.ok) throw new Error('네트워크 오류');
 
       const ok=await waitUntilUpdated(vehicle,beforeCount,15000);
 
-      odoI.value=''; memoI.value=''; odoI.focus();
-      // 시간을 다시 현재시간으로 초기화하고 싶으면 아래 두 줄 유지
-      dtInput.value = toLocalDatetimeValue(new Date());
-      refreshTimeText();
+      odoI.value='';
+      memoI.value='';
+      // 다음 입력을 위해 현재 시간으로 다시 세팅
+      timeInput.value = toDatetimeLocalValue(new Date());
 
+      odoI.focus();
       await refreshPrev(true);
       loadHistory(vehicle,true);
       setTimeout(()=>{refreshPrev(true);loadHistory(vehicle,true);},1200);
@@ -645,7 +586,6 @@ function renderVehicle(vehicle){
         }
         if(last){
           const post=Number(last[5]||'');
-          // 가장 최근 로그의 주행후 km = 다음 운행전 km
           prevBadge.textContent = Number.isFinite(post) ? `운행 전: ${post} km` : '운행 전: —';
         }else{
           prevBadge.textContent='운행 전: (첫 기록)';
@@ -706,7 +646,7 @@ function renderRecentTab(){
       pager.innerHTML='';
       for(let i=1;i<=maxPages;i++){
         const b=ce('button',{textContent:String(i),className:'btn small'});
-        if(i===cur) b.style.background='#1b64da', b.style.color='#fff';
+        if(i===cur){ b.style.background='#1b64da'; b.style.color='#fff'; }
         b.onclick=()=>{cur=i;draw();};
         pager.append(b);
       }
@@ -923,7 +863,7 @@ function refreshAfterChange(vehicle){
   if(location.hash==='#/recent') renderRecentTab();
 }
 
-/* ===== 날짜 포맷 (시트에서 읽어온 값 → 보기용) ===== */
+/* ===== 날짜 포맷 ===== */
 function fmtDateSmart(s){
   if(s instanceof Date && !isNaN(s)) return ymdhm(s);
   if(/^\d+(\.\d+)?$/.test(String(s))){
